@@ -1,0 +1,36 @@
+# Build artifacts
+target/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# IDE files
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+.settings/
+.factorypath
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Maven
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.properties.bak
+
+# H2 database files (local dev)
+*.db
+*.mv.db
+*.trace.db
+
+# Env files
+.env
