@@ -48,6 +48,7 @@ public class Order {
     private Long userId;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<OrderItem> orderItems = new ArrayList<>();
 
     private LocalDateTime createdAt;

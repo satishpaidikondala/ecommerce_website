@@ -33,6 +33,7 @@ public class Cart {
     private Long userId;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL)
+    @Builder.Default
     private List<CartItem> items = new ArrayList<>();
 
     private LocalDateTime createdAt;
