@@ -33,6 +33,7 @@
         <module>inventory-service</module>
         <module>wishlist-service</module>
         <module>review-service</module>
+        <module>admin-service</module>
     </modules>
 
     <properties>

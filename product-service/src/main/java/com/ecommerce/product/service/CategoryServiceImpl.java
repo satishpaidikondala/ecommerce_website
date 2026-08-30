@@ -29,6 +29,15 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public Category updateCategory(Long id, Category updated) {
+        Category existing = getCategoryById(id);
+        existing.setName(updated.getName());
+        existing.setDescription(updated.getDescription());
+        existing.setImageUrl(updated.getImageUrl());
+        return categoryRepository.save(existing);
+    }
+
+    @Override
     public List<Category> getAllActiveCategories() {
         return categoryRepository.findByActiveTrue();
     }

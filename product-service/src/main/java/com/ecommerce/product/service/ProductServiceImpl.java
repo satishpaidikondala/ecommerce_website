@@ -118,7 +118,23 @@ public class ProductServiceImpl implements ProductService {
     public void deactivateProduct(Long id) {
         Product p = getProductById(id);
         p.setActive(false);
-        Product saved = productRepository.save(p);
-        indexProduct(saved);
+        productRepository.save(p);
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(value = "products", allEntries = true)
+    public void deleteProduct(Long id) {
+        productRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Product> getProductsByPriceRange(java.math.BigDecimal min, java.math.BigDecimal max) {
+        return productRepository.findByPriceBetween(min, max);
+    }
+
+    @Override
+    public List<Product> getTopRatedProducts() {
+        return productRepository.findAll().stream().sorted((a, b) -> b.getPrice().compareTo(a.getPrice())).limit(10).toList();
     }
 }

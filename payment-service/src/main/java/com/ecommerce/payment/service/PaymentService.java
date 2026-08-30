@@ -11,4 +11,6 @@ public interface PaymentService {
     Payment getPaymentByOrderId(Long orderId);
     List<Payment> getPaymentsByStatus(PaymentStatus status);
     Payment updatePaymentStatus(Long id, PaymentStatus status);
+    Payment refundPayment(Long id);
+    void handleWebhook(String payload);
 }

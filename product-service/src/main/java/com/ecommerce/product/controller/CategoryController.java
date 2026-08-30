@@ -40,4 +40,11 @@ public class CategoryController {
         Category c = categoryService.getCategoryById(id);
         return ResponseEntity.ok(new CategoryResponse(c.getId(), c.getName(), c.getDescription(), c.getImageUrl(), c.isActive()));
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<CategoryResponse> update(@PathVariable Long id, @RequestBody CategoryRequest req) {
+        Category c = Category.builder().name(req.getName()).description(req.getDescription()).imageUrl(req.getImageUrl()).build();
+        Category updated = categoryService.updateCategory(id, c);
+        return ResponseEntity.ok(new CategoryResponse(updated.getId(), updated.getName(), updated.getDescription(), updated.getImageUrl(), updated.isActive()));
+    }
 }

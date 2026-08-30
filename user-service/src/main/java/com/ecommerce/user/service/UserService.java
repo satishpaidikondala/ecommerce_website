@@ -22,4 +22,10 @@ public interface UserService {
     String forgotPassword(String email);
 
     void resetPassword(String token, String newPassword);
+
+    void deleteUser(Long id);
+
+    User updatePassword(Long id, String newPassword);
+
+    User updateAddress(Long id, User addressInfo);
 }

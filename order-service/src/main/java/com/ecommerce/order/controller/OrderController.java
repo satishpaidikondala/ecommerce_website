@@ -46,4 +46,19 @@ public class OrderController {
     public ResponseEntity<OrderResponse> updateStatus(@PathVariable Long id, @RequestParam OrderStatus status) {
         return ResponseEntity.ok(OrderMapper.toResponse(orderService.updateOrderStatus(id, status)));
     }
+
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<OrderResponse> cancel(@PathVariable Long id) {
+        return ResponseEntity.ok(OrderMapper.toResponse(orderService.cancelOrder(id)));
+    }
+
+    @GetMapping("/{id}/items")
+    public ResponseEntity<java.util.List<com.ecommerce.common.entity.OrderItem>> getItems(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.getOrderItems(id));
+    }
+
+    @GetMapping("/{id}/invoice")
+    public ResponseEntity<OrderResponse> getInvoice(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.getInvoice(id));
+    }
 }

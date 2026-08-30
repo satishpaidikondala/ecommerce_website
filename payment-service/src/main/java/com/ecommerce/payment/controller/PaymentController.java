@@ -46,4 +46,15 @@ public class PaymentController {
     public ResponseEntity<PaymentResponse> updateStatus(@PathVariable Long id, @RequestParam PaymentStatus status) {
         return ResponseEntity.ok(PaymentMapper.toResponse(paymentService.updatePaymentStatus(id, status)));
     }
+
+    @PostMapping("/{id}/refund")
+    public ResponseEntity<PaymentResponse> refund(@PathVariable Long id) {
+        return ResponseEntity.ok(PaymentMapper.toResponse(paymentService.refundPayment(id)));
+    }
+
+    @PostMapping("/webhook")
+    public ResponseEntity<String> webhook(@RequestBody String payload) {
+        paymentService.handleWebhook(payload);
+        return ResponseEntity.ok("Webhook processed");
+    }
 }

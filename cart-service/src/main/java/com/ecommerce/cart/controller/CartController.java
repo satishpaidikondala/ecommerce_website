@@ -60,6 +60,13 @@ public class CartController {
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping("/{cartId}/items/{productId}")
+    public ResponseEntity<CartItem> updateQuantity(@PathVariable Long cartId,
+                                                   @PathVariable Long productId,
+                                                   @RequestParam int quantity) {
+        return ResponseEntity.ok(cartItemService.updateQuantity(cartId, productId, quantity));
+    }
+
     @DeleteMapping("/{cartId}/clear")
     public ResponseEntity<Void> clearCart(@PathVariable Long cartId) {
         cartService.emptyCart(cartId);

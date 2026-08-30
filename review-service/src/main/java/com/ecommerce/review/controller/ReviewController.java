@@ -28,6 +28,16 @@ public class ReviewController {
         return ResponseEntity.ok(service.getAverageRating(productId));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Review> update(@PathVariable Long id, @RequestBody Review updated) {
+        return ResponseEntity.ok(service.updateReview(id, updated));
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<java.util.List<Review>> getByUser(@PathVariable Long userId) {
+        return ResponseEntity.ok(service.getReviewsByUser(userId));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.deleteReview(id);

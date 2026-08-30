@@ -112,4 +112,28 @@ public class UserServiceImp implements UserService {
         user.setTokenExpiry(null);
         userRepository.save(user);
     }
+
+    @Override
+    public void deleteUser(Long id) {
+        User user = getUserById(id);
+        userRepository.delete(user);
+    }
+
+    @Override
+    public User updatePassword(Long id, String newPassword) {
+        User user = getUserById(id);
+        user.setPassword(passwordEncoder.encode(newPassword));
+        return userRepository.save(user);
+    }
+
+    @Override
+    public User updateAddress(Long id, User addressInfo) {
+        User user = getUserById(id);
+        user.setAddress(addressInfo.getAddress());
+        user.setCity(addressInfo.getCity());
+        user.setState(addressInfo.getState());
+        user.setZipCode(addressInfo.getZipCode());
+        user.setCountry(addressInfo.getCountry());
+        return userRepository.save(user);
+    }
 }

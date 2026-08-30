@@ -75,4 +75,24 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(status);
         return orderRepository.save(order);
     }
+
+    @Override
+    @Transactional
+    public Order cancelOrder(Long id) {
+        Order order = getOrderById(id);
+        if (order.getStatus() == OrderStatus.SHIPPED || order.getStatus() == OrderStatus.DELIVERED)
+            throw new IllegalArgumentException("Cannot cancel shipped/delivered order");
+        order.setStatus(OrderStatus.CANCELLED);
+        return orderRepository.save(order);
+    }
+
+    @Override
+    public java.util.List<com.ecommerce.common.entity.OrderItem> getOrderItems(Long id) {
+        return getOrderById(id).getOrderItems();
+    }
+
+    @Override
+    public com.ecommerce.order.dto.OrderResponse getInvoice(Long id) {
+        return com.ecommerce.order.mapper.OrderMapper.toResponse(getOrderById(id));
+    }
 }

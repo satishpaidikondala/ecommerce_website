@@ -56,6 +56,11 @@ spring:
           predicates:
             - Path=/api/inventory/**
 
+        - id: admin-service
+          uri: lb://admin-service
+          predicates:
+            - Path=/api/admin/**
+
 management:
   tracing:
     sampling:

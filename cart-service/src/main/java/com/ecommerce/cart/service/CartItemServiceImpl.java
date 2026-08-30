@@ -75,6 +75,16 @@ public class CartItemServiceImpl implements CartItemService {
     }
 
     @Override
+    @Transactional
+    public CartItem updateQuantity(Long cartId, Long productId, int quantity) {
+        CartItem item = cartItemRepository.findByCartIdAndProductId(cartId, productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found in cart"));
+        item.setQuantity(quantity);
+        item.setSubtotal(item.getPrice().multiply(BigDecimal.valueOf(quantity)));
+        return cartItemRepository.save(item);
+    }
+
+    @Override
     public CartTotalResponse calculateCartTotal(Long cartId) {
         List<CartItem> items = cartItemRepository.findByCartId(cartId);
         int totalItems = 0;

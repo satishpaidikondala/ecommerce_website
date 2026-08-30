@@ -56,4 +56,18 @@ public class PaymentServiceImpl implements PaymentService {
         p.setStatus(status);
         return paymentRepository.save(p);
     }
+
+    @Override
+    @Transactional
+    public Payment refundPayment(Long id) {
+        Payment p = getPaymentById(id);
+        if (p.getStatus() != PaymentStatus.SUCCESS) throw new IllegalArgumentException("Only successful payments can be refunded");
+        p.setStatus(PaymentStatus.REFUNDED);
+        return paymentRepository.save(p);
+    }
+
+    @Override
+    public void handleWebhook(String payload) {
+        org.slf4j.LoggerFactory.getLogger(PaymentServiceImpl.class).info("Webhook received: {}", payload);
+    }
 }

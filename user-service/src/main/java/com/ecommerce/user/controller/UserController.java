@@ -79,4 +79,28 @@ public class UserController {
         userService.resetPassword(token, newPassword);
         return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/password")
+    public ResponseEntity<UserResponse> updatePassword(@PathVariable Long id,
+                                                       @RequestParam String newPassword) {
+        return ResponseEntity.ok(UserMapper.toResponse(userService.updatePassword(id, newPassword)));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getMe(@RequestHeader(value = "X-User-Id", required = false) Long userId,
+                                              @RequestHeader(value = "Authorization", required = false) String auth) {
+        if (userId != null) return ResponseEntity.ok(UserMapper.toResponse(userService.getUserById(userId)));
+        throw new IllegalArgumentException("Missing X-User-Id header");
+    }
+
+    @PutMapping("/{id}/address")
+    public ResponseEntity<UserResponse> updateAddress(@PathVariable Long id, @RequestBody User addressInfo) {
+        return ResponseEntity.ok(UserMapper.toResponse(userService.updateAddress(id, addressInfo)));
+    }
 }

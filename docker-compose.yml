@@ -274,6 +274,16 @@ services:
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://ecommerce-registry:8761/eureka/
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-product:3306/reviewdb?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
 
+  admin-service:
+    build: ./admin-service
+    container_name: admin-service
+    ports:
+      - "8094:8094"
+    depends_on:
+      - ecommerce-registry
+    environment:
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://ecommerce-registry:8761/eureka/
+
   rabbitmq:
     image: rabbitmq:3-management
     container_name: ecommerce-rabbitmq

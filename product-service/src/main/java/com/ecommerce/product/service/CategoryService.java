@@ -8,4 +8,5 @@ public interface CategoryService {
     Category getCategoryById(Long id);
     List<Category> getAllActiveCategories();
     List<Category> searchCategories(String keyword);
+    Category updateCategory(Long id, Category updated);
 }

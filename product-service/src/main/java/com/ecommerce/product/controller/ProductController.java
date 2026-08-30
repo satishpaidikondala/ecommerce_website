@@ -41,12 +41,20 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<List<ProductResponse>> getAll(@RequestParam(required = false) String search,
-                                                        @RequestParam(required = false) Long categoryId) {
+                                                        @RequestParam(required = false) Long categoryId,
+                                                        @RequestParam(required = false) java.math.BigDecimal minPrice,
+                                                        @RequestParam(required = false) java.math.BigDecimal maxPrice) {
         List<ProductResponse> list;
         if (search != null) list = productService.searchProducts(search).stream().map(ProductMapper::toResponse).toList();
         else if (categoryId != null) list = productService.getProductsByCategory(categoryId).stream().map(ProductMapper::toResponse).toList();
+        else if (minPrice != null && maxPrice != null) list = productService.getProductsByPriceRange(minPrice, maxPrice).stream().map(ProductMapper::toResponse).toList();
         else list = productService.getAllProducts().stream().map(ProductMapper::toResponse).toList();
         return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/top-rated")
+    public ResponseEntity<List<ProductResponse>> topRated() {
+        return ResponseEntity.ok(productService.getTopRatedProducts().stream().map(ProductMapper::toResponse).toList());
     }
 
     @PutMapping("/{id}")
@@ -59,6 +67,13 @@ public class ProductController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deactivate(@PathVariable Long id) {
         productService.deactivateProduct(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
 }

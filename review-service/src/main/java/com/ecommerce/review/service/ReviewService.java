@@ -16,5 +16,12 @@ public class ReviewService {
         Double avg = repo.findAverageRatingByProductId(productId);
         return avg != null ? Math.round(avg * 10.0) / 10.0 : 0.0;
     }
+    public Review updateReview(Long id, Review updated) {
+        Review existing = repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Review not found: " + id));
+        existing.setRating(updated.getRating());
+        existing.setComment(updated.getComment());
+        return repo.save(existing);
+    }
+    public java.util.List<Review> getReviewsByUser(Long userId) { return repo.findByUserId(userId); }
     public void deleteReview(Long id) { repo.deleteById(id); }
 }
