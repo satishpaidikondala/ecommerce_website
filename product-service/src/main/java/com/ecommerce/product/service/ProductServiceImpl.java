@@ -9,16 +9,32 @@ import com.ecommerce.common.entity.Category;
 import com.ecommerce.common.entity.Product;
 import com.ecommerce.product.repository.CategoryRepository;
 import com.ecommerce.product.repository.ProductRepository;
+import com.ecommerce.product.search.ProductDocument;
+import com.ecommerce.product.search.ProductSearchRepository;
 
 @Service
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final ProductSearchRepository searchRepository;
 
-    public ProductServiceImpl(ProductRepository productRepository, CategoryRepository categoryRepository) {
+    public ProductServiceImpl(ProductRepository productRepository, CategoryRepository categoryRepository,
+                              ProductSearchRepository searchRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
+        this.searchRepository = searchRepository;
+    }
+
+    private void indexProduct(Product p) {
+        try {
+            ProductDocument doc = new ProductDocument(
+                    String.valueOf(p.getId()), p.getName(), p.getDescription(),
+                    p.getSku(), p.getPrice(),
+                    p.getCategory() != null ? p.getCategory().getName() : null,
+                    p.isActive());
+            searchRepository.save(doc);
+        } catch (Exception ignored) { /* ES down in dev is ok */ }
     }
 
     @Override
@@ -28,7 +44,9 @@ public class ProductServiceImpl implements ProductService {
         Category cat = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new IllegalArgumentException("Category not found: " + categoryId));
         product.setCategory(cat);
-        return productRepository.save(product);
+        Product saved = productRepository.save(product);
+        indexProduct(saved);
+        return saved;
     }
 
     @Override
@@ -52,6 +70,21 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<Product> searchProducts(String keyword) {
+        try {
+            var docs = searchRepository.findByNameContainingOrDescriptionContaining(keyword, keyword);
+            if (!docs.isEmpty()) {
+                return docs.stream().map(d -> {
+                    Product p = new Product();
+                    p.setId(Long.valueOf(d.getId()));
+                    p.setName(d.getName());
+                    p.setDescription(d.getDescription());
+                    p.setSku(d.getSku());
+                    p.setPrice(d.getPrice());
+                    p.setActive(d.isActive());
+                    return p;
+                }).toList();
+            }
+        } catch (Exception ignored) { /* fallback to DB */ }
         return productRepository.findByNameContainingIgnoreCase(keyword);
     }
 
@@ -65,7 +98,9 @@ public class ProductServiceImpl implements ProductService {
         existing.setPrice(updated.getPrice());
         existing.setUnitsInStock(updated.getUnitsInStock());
         existing.setImageUrl(updated.getImageUrl());
-        return productRepository.save(existing);
+        Product saved = productRepository.save(existing);
+        indexProduct(saved);
+        return saved;
     }
 
     @Override

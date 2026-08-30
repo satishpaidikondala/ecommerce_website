@@ -6,7 +6,7 @@ import com.ecommerce.common.entity.User;
 import com.ecommerce.user.dto.AuthResponse;
 import com.ecommerce.user.dto.LoginRequest;
 import com.ecommerce.user.repository.UserRepository;
-import com.ecommerce.user.security.JwtUtil;
+import com.ecommerce.common.security.JwtUtil;
 
 @Service
 public class AuthService {
