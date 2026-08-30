@@ -1,11 +1,9 @@
 package com.ecommerce.auth.config;
 
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
 import java.time.Duration;
 import java.util.UUID;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +24,7 @@ import org.springframework.security.oauth2.server.authorization.settings.TokenSe
 import org.springframework.security.web.SecurityFilterChain;
 
 import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.OctetSequenceKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
@@ -77,20 +75,12 @@ public class AuthorizationServerConfig {
 
     @Bean
     public JWKSource<SecurityContext> jwkSource() {
-        KeyPair keyPair = generateRsaKey();
-        RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
-        RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
-        RSAKey rsaKey = new RSAKey.Builder(publicKey).privateKey(privateKey)
+        // Unified HMAC secret — same as ecommerce-common JwtUtil / gateway filter
+        String secret = "ecommerce-secret-key-that-is-at-least-32-chars-long-12345";
+        SecretKey key = new SecretKeySpec(secret.getBytes(), "HmacSHA256");
+        OctetSequenceKey octetKey = new OctetSequenceKey.Builder(key)
                 .keyID(UUID.randomUUID().toString()).build();
-        return new ImmutableJWKSet<>(new JWKSet(rsaKey));
-    }
-
-    private static KeyPair generateRsaKey() {
-        try {
-            KeyPairGenerator gen = KeyPairGenerator.getInstance("RSA");
-            gen.initialize(2048);
-            return gen.generateKeyPair();
-        } catch (Exception ex) { throw new IllegalStateException(ex); }
+        return new ImmutableJWKSet<>(new JWKSet(octetKey));
     }
 
     @Bean

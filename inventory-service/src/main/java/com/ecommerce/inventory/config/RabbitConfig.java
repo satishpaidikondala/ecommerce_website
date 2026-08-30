@@ -1,4 +1,4 @@
-package com.ecommerce.notification.config;
+package com.ecommerce.inventory.config;
 
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitConfig {
     public static final String EXCHANGE = "ecommerce.exchange";
-    public static final String ORDER_CREATED_QUEUE = "notification.order.created.queue";
+    public static final String ORDER_CREATED_QUEUE = "inventory.order.created.queue";
     public static final String ORDER_CREATED_KEY = "order.created";
     @Bean public TopicExchange exchange() { return new TopicExchange(EXCHANGE); }
     @Bean public Queue orderCreatedQueue() { return new Queue(ORDER_CREATED_QUEUE, true); }

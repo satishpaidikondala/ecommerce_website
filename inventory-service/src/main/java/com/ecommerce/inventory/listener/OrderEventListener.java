@@ -13,7 +13,7 @@ public class OrderEventListener {
     private final InventoryService inventoryService;
     public OrderEventListener(InventoryService inventoryService) { this.inventoryService = inventoryService; }
 
-    @RabbitListener(queues = "order.created.queue")
+    @RabbitListener(queues = "inventory.order.created.queue")
     public void onOrderCreated(OrderCreatedEvent event) {
         // Saga step 1: reserve stock (simplified: assume 1 unit per order for Gram Setu produce)
         boolean ok = inventoryService.reserveStock(event.getOrderId(), 1);
