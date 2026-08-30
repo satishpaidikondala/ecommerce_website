@@ -1,23 +1,4 @@
-server:
-  port: 8083
 spring:
-  config:
-    import: optional:configserver:http://localhost:8888
-  application:
-    name: order-service
-  profiles:
-    active: h2
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
-  instance:
-    prefer-ip-address: true
----
-spring:
-  config:
-    activate:
-      on-profile: h2
   datasource:
     url: jdbc:h2:mem:orderdb
     driver-class-name: org.h2.Driver
@@ -55,3 +36,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
+  data:
+    redis:
+      host: localhost
+      port: 6379
