@@ -7,20 +7,23 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.ecommerce.common.entity.Order;
 import com.ecommerce.common.entity.OrderStatus;
-import com.ecommerce.common.event.OrderCreatedEvent;
 import com.ecommerce.order.dto.CreateOrderRequest;
-import com.ecommerce.order.event.OrderEventPublisher;
+import com.ecommerce.order.outbox.OutboxEvent;
+import com.ecommerce.order.outbox.OutboxRepository;
 import com.ecommerce.order.repository.OrderRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
-    private final OrderEventPublisher eventPublisher;
+    private final OutboxRepository outboxRepository;
+    private final ObjectMapper objectMapper;
 
-    public OrderServiceImpl(OrderRepository orderRepository, OrderEventPublisher eventPublisher) {
+    public OrderServiceImpl(OrderRepository orderRepository, OutboxRepository outboxRepository, ObjectMapper objectMapper) {
         this.orderRepository = orderRepository;
-        this.eventPublisher = eventPublisher;
+        this.outboxRepository = outboxRepository;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -38,9 +41,14 @@ public class OrderServiceImpl implements OrderService {
                 .userId(req.getUserId())
                 .build();
         Order saved = orderRepository.save(order);
-        eventPublisher.publishOrderCreated(new OrderCreatedEvent(
-                saved.getId(), saved.getOrderNumber(), req.getUserId(),
-                saved.getTotalAmount(), saved.getCreatedAt()));
+        try {
+            String payload = objectMapper.writeValueAsString(new com.ecommerce.common.event.OrderCreatedEvent(
+                    saved.getId(), saved.getOrderNumber(), req.getUserId(),
+                    saved.getTotalAmount(), saved.getCreatedAt()));
+            outboxRepository.save(OutboxEvent.builder()
+                    .aggregateType("Order").aggregateId(saved.getId())
+                    .eventType("OrderCreated").payload(payload).build());
+        } catch (Exception e) { throw new RuntimeException("Outbox serialization failed", e); }
         return saved;
     }
 
