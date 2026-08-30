@@ -28,12 +28,22 @@ resilience4j:
       productService:
         max-attempts: 3
         wait-duration: 500ms
+  ratelimiter:
+    instances:
+      productService:
+        limit-for-period: 10
+        limit-refresh-period: 1s
+        timeout-duration: 0s
+  bulkhead:
+    instances:
+      productService:
+        max-concurrent-calls: 20
 
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,circuitbreakers,circuitbreakerevents,retryevents
+        include: health,info,circuitbreakers,circuitbreakerevents,retryevents,ratelimiters,ratelimiterevents,bulkheads,bulkheadevents
 
 logging:
   pattern:
