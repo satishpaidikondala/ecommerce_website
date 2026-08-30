@@ -1,14 +1,78 @@
 services:
-  mysql:
+  mysql-user:
     image: mysql:8.0
-    container_name: ecommerce-mysql
+    container_name: mysql-user
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: ecommerce
+      MYSQL_DATABASE: userdb
     ports:
       - "3306:3306"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - mysql_user_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql-product:
+    image: mysql:8.0
+    container_name: mysql-product
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: productdb
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_product_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql-order:
+    image: mysql:8.0
+    container_name: mysql-order
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: orderdb
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql_order_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql-payment:
+    image: mysql:8.0
+    container_name: mysql-payment
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: paymentdb
+    ports:
+      - "3309:3306"
+    volumes:
+      - mysql_payment_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mysql-cart:
+    image: mysql:8.0
+    container_name: mysql-cart
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cartdb
+    ports:
+      - "3310:3306"
+    volumes:
+      - mysql_cart_data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
@@ -19,12 +83,12 @@ services:
     image: phpmyadmin/phpmyadmin
     container_name: ecommerce-phpmyadmin
     environment:
-      PMA_HOST: mysql
+      PMA_HOST: mysql-user
       PMA_PORT: 3306
     ports:
       - "8086:80"
     depends_on:
-      mysql:
+      mysql-user:
         condition: service_healthy
 
   ecommerce-registry:
@@ -63,11 +127,14 @@ services:
     ports:
       - "8081:8081"
     depends_on:
-      - ecommerce-registry
-      - mysql
+      mysql-user:
+        condition: service_healthy
+      ecommerce-registry:
+        condition: service_started
     environment:
       - SPRING_PROFILES_ACTIVE=mysql
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://ecommerce-registry:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-user:3306/userdb?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
       - JWT_SECRET=ecommerce-secret-key-that-is-at-least-32-chars-long-12345
 
   product-service:
@@ -76,12 +143,16 @@ services:
     ports:
       - "8082:8082"
     depends_on:
-      - ecommerce-registry
-      - mysql
-      - redis
+      mysql-product:
+        condition: service_healthy
+      ecommerce-registry:
+        condition: service_started
+      redis:
+        condition: service_healthy
     environment:
       - SPRING_PROFILES_ACTIVE=mysql
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://ecommerce-registry:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-product:3306/productdb?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
       - SPRING_DATA_REDIS_HOST=redis
 
   order-service:
@@ -90,11 +161,17 @@ services:
     ports:
       - "8083:8083"
     depends_on:
-      - ecommerce-registry
-      - mysql
+      mysql-order:
+        condition: service_healthy
+      ecommerce-registry:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
     environment:
       - SPRING_PROFILES_ACTIVE=mysql
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://ecommerce-registry:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-order:3306/orderdb?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_RABBITMQ_HOST=rabbitmq
 
   payment-service:
     build: ./payment-service
@@ -102,11 +179,17 @@ services:
     ports:
       - "8084:8084"
     depends_on:
-      - ecommerce-registry
-      - mysql
+      mysql-payment:
+        condition: service_healthy
+      ecommerce-registry:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
     environment:
       - SPRING_PROFILES_ACTIVE=mysql
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://ecommerce-registry:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-payment:3306/paymentdb?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_RABBITMQ_HOST=rabbitmq
 
   cart-service:
     build: ./cart-service
@@ -114,11 +197,18 @@ services:
     ports:
       - "8085:8085"
     depends_on:
-      - ecommerce-registry
-      - mysql
+      mysql-cart:
+        condition: service_healthy
+      ecommerce-registry:
+        condition: service_started
+      redis:
+        condition: service_healthy
     environment:
       - SPRING_PROFILES_ACTIVE=mysql
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://ecommerce-registry:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-cart:3306/cartdb?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_RABBITMQ_HOST=rabbitmq
 
   ecommerce-auth:
     build: ./ecommerce-auth
@@ -160,11 +250,14 @@ services:
     ports:
       - "8092:8092"
     depends_on:
-      - ecommerce-registry
-      - mysql
+      mysql-cart:
+        condition: service_healthy
+      ecommerce-registry:
+        condition: service_started
     environment:
       - SPRING_PROFILES_ACTIVE=mysql
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://ecommerce-registry:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-cart:3306/wishlistdb?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
 
   review-service:
     build: ./review-service
@@ -172,11 +265,14 @@ services:
     ports:
       - "8093:8093"
     depends_on:
-      - ecommerce-registry
-      - mysql
+      mysql-product:
+        condition: service_healthy
+      ecommerce-registry:
+        condition: service_started
     environment:
       - SPRING_PROFILES_ACTIVE=mysql
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://ecommerce-registry:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-product:3306/reviewdb?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -217,5 +313,9 @@ services:
       - es_data:/usr/share/elasticsearch/data
 
 volumes:
-  mysql_data:
+  mysql_user_data:
+  mysql_product_data:
+  mysql_order_data:
+  mysql_payment_data:
+  mysql_cart_data:
   es_data:
