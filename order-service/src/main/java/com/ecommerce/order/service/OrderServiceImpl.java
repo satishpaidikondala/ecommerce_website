@@ -8,16 +8,20 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ecommerce.common.entity.Order;
 import com.ecommerce.common.entity.OrderStatus;
 import com.ecommerce.common.entity.User;
+import com.ecommerce.common.event.OrderCreatedEvent;
 import com.ecommerce.order.dto.CreateOrderRequest;
+import com.ecommerce.order.event.OrderEventPublisher;
 import com.ecommerce.order.repository.OrderRepository;
 
 @Service
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
+    private final OrderEventPublisher eventPublisher;
 
-    public OrderServiceImpl(OrderRepository orderRepository) {
+    public OrderServiceImpl(OrderRepository orderRepository, OrderEventPublisher eventPublisher) {
         this.orderRepository = orderRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -34,7 +38,11 @@ public class OrderServiceImpl implements OrderService {
                 .shippingCountry(req.getShippingCountry())
                 .user(User.builder().id(req.getUserId()).build())
                 .build();
-        return orderRepository.save(order);
+        Order saved = orderRepository.save(order);
+        eventPublisher.publishOrderCreated(new OrderCreatedEvent(
+                saved.getId(), saved.getOrderNumber(), req.getUserId(),
+                saved.getTotalAmount(), saved.getCreatedAt()));
+        return saved;
     }
 
     @Override
