@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import com.ecommerce.common.entity.Cart;
 
@@ -21,6 +22,7 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
     // Q6: Find abandoned carts (not updated in 7 days)
     List<Cart> findByUpdatedAtBefore(LocalDateTime dateTime);
 
-    // Q7: Count carts (for analytics)
-    long count();
+    // Q7: Count non-empty carts (users who have items but haven't checked out)
+    @Query("SELECT COUNT(c) FROM Cart c WHERE SIZE(c.items) > 0")
+    long countNonEmptyCarts();
 }
