@@ -4,6 +4,7 @@ import java.util.List;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import com.ecommerce.common.entity.Product;
 import com.ecommerce.product.dto.CreateProductRequest;
@@ -22,6 +23,7 @@ public class ProductController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProductResponse> create(@Valid @RequestBody CreateProductRequest req) {
         Product p = Product.builder()
                 .name(req.getName()).description(req.getDescription())
@@ -48,11 +50,13 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ProductResponse> update(@PathVariable Long id, @RequestBody Product updated) {
         return ResponseEntity.ok(ProductMapper.toResponse(productService.updateProduct(id, updated)));
     }
 
     @PatchMapping("/{id}/deactivate")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deactivate(@PathVariable Long id) {
         productService.deactivateProduct(id);
         return ResponseEntity.noContent().build();
