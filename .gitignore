@@ -34,6 +34,36 @@ Thumbs.db
 
 # Env files
 .env
+.env.local
+.env.*.local
 
 # Eclipse bin
 bin/
+out/
+
+# Gradle
+.gradle/
+gradle-wrapper.jar
+
+# Node / Frontend (future)
+node_modules/
+dist/
+build/
+.next/
+.nuxt/
+.turbo/
+
+# Coverage & temp
+coverage/
+.nyc_output/
+*.tmp
+*.temp
+.husky/
+
+# Spring
+.springBeans
+.sts4-cache/
+
+# VS Code history
+.history/
+.cache/
