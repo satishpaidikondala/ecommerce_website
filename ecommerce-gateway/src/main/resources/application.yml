@@ -36,6 +36,26 @@ spring:
           predicates:
             - Path=/api/carts/**
 
+        - id: wishlist-service
+          uri: lb://wishlist-service
+          predicates:
+            - Path=/api/wishlist/**
+
+        - id: review-service
+          uri: lb://review-service
+          predicates:
+            - Path=/api/reviews/**
+
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/notifications/**
+
+        - id: inventory-service
+          uri: lb://inventory-service
+          predicates:
+            - Path=/api/inventory/**
+
 eureka:
   client:
     service-url:

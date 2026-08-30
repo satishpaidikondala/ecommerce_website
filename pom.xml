@@ -31,6 +31,8 @@
         <module>ecommerce-auth</module>
         <module>notification-service</module>
         <module>inventory-service</module>
+        <module>wishlist-service</module>
+        <module>review-service</module>
     </modules>
 
     <properties>

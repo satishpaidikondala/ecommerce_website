@@ -45,6 +45,11 @@ management:
       exposure:
         include: health,info,circuitbreakers,circuitbreakerevents,retryevents,ratelimiters,ratelimiterevents,bulkheads,bulkheadevents
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
 logging:
   pattern:
     console: "%d{HH:mm:ss} [%X{X-Correlation-Id}] %-5level %logger{36} - %msg%n"

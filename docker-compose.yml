@@ -152,6 +152,30 @@ services:
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://ecommerce-registry:8761/eureka/
       - SPRING_RABBITMQ_HOST=rabbitmq
 
+  wishlist-service:
+    build: ./wishlist-service
+    container_name: wishlist-service
+    ports:
+      - "8092:8092"
+    depends_on:
+      - ecommerce-registry
+      - mysql
+    environment:
+      - SPRING_PROFILES_ACTIVE=mysql
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://ecommerce-registry:8761/eureka/
+
+  review-service:
+    build: ./review-service
+    container_name: review-service
+    ports:
+      - "8093:8093"
+    depends_on:
+      - ecommerce-registry
+      - mysql
+    environment:
+      - SPRING_PROFILES_ACTIVE=mysql
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://ecommerce-registry:8761/eureka/
+
   rabbitmq:
     image: rabbitmq:3-management
     container_name: ecommerce-rabbitmq
@@ -163,6 +187,17 @@ services:
       RABBITMQ_DEFAULT_PASS: guest
     healthcheck:
       test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: ecommerce-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
