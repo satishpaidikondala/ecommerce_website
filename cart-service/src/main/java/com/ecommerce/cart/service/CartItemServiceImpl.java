@@ -39,34 +39,23 @@ public class CartItemServiceImpl implements CartItemService {
     @Override
     @Transactional
     public CartItem addProductToCart(Long cartId, Long productId) {
-
-        Optional<CartItem> existing =
-                cartItemRepository.findByCartIdAndProductId(cartId, productId);
-
+        Optional<CartItem> existing = cartItemRepository.findByCartIdAndProductId(cartId, productId);
         if (existing.isPresent()) {
-            // Product already in cart -> increase quantity and recalculate subtotal
             CartItem item = existing.get();
             item.setQuantity(item.getQuantity() + 1);
-            item.setSubtotal(item.getPrice()
-                    .multiply(BigDecimal.valueOf(item.getQuantity())));
+            item.setSubtotal(item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
             return cartItemRepository.save(item);
         }
-
-        // New product -> fetch via REST call to product-service (database-per-service pattern)
         Product product = productServiceClient.getProduct(productId);
         if (product == null) {
             throw new IllegalArgumentException("Product not found with id: " + productId);
         }
-
         if (!product.isActive()) {
-            throw new IllegalArgumentException(
-                    "Product is not available: " + product.getName());
+            throw new IllegalArgumentException("Product is not available: " + product.getName());
         }
-
         if (product.getUnitsInStock() < 1) {
             throw new IllegalArgumentException("Product out of stock: " + product.getName());
         }
-
         CartItem newItem = CartItem.builder()
                 .cart(Cart.builder().id(cartId).build())
                 .product(product)
@@ -74,7 +63,6 @@ public class CartItemServiceImpl implements CartItemService {
                 .price(product.getPrice())
                 .subtotal(product.getPrice())
                 .build();
-
         return cartItemRepository.save(newItem);
     }
 
@@ -82,24 +70,19 @@ public class CartItemServiceImpl implements CartItemService {
     @Transactional
     public void removeProductFromCart(Long cartId, Long productId) {
         CartItem item = cartItemRepository.findByCartIdAndProductId(cartId, productId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Product not found in cart"));
-
+                .orElseThrow(() -> new IllegalArgumentException("Product not found in cart"));
         cartItemRepository.delete(item);
     }
 
     @Override
     public CartTotalResponse calculateCartTotal(Long cartId) {
         List<CartItem> items = cartItemRepository.findByCartId(cartId);
-
         int totalItems = 0;
         BigDecimal totalAmount = BigDecimal.ZERO;
-
         for (CartItem item : items) {
             totalItems += item.getQuantity();
             totalAmount = totalAmount.add(item.getSubtotal());
         }
-
         return new CartTotalResponse(totalItems, totalAmount);
     }
 }

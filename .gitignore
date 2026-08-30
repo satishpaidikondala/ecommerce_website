@@ -34,3 +34,6 @@ Thumbs.db
 
 # Env files
 .env
+
+# Eclipse bin
+bin/

@@ -63,14 +63,10 @@ public class CartServiceImp implements CartService {
     @Transactional
     @CacheEvict(value = "carts", allEntries = true)
     public void emptyCart(Long cartId) {
-        // Proper version: validates existence, uses delete query, updates cart totals
         Cart cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Cart not found with id: " + cartId));
-
         cartItemRepository.deleteByCartId(cartId);
-
-        // Reset cart totals after clearing
         cart.setTotalItems(0);
         cart.setTotalAmount(java.math.BigDecimal.ZERO);
         cartRepository.save(cart);

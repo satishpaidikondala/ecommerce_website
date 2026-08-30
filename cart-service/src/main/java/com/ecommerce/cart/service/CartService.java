@@ -13,15 +13,9 @@ public interface CartService {
 
     Cart getOrCreateCart(Long userId);
 
-    // Q5: Calculate cart totals (delegates to CartItemService, kept here for convenience)
-    // Implemented in CartItemService.calculateCartTotal()
-
-    // Q7: How many users have items in cart but haven't checked out
     long countActiveCarts();
 
-    // Q8: Abandoned carts not updated in N days
     List<Cart> findAbandonedCarts(int days);
 
-    // Code Review Q: Proper empty cart (vs junior's buggy version)
     void emptyCart(Long cartId);
 }
