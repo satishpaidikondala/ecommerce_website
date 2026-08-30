@@ -78,9 +78,11 @@ services:
     depends_on:
       - ecommerce-registry
       - mysql
+      - redis
     environment:
       - SPRING_PROFILES_ACTIVE=mysql
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://ecommerce-registry:8761/eureka/
+      - SPRING_DATA_REDIS_HOST=redis
 
   order-service:
     build: ./order-service
