@@ -3,6 +3,16 @@ server:
 spring:
   application:
     name: product-service
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=600s
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,caches
   profiles:
     active: h2
 eureka:

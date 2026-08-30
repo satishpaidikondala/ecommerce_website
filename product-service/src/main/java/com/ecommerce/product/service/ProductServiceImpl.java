@@ -1,6 +1,8 @@
 package com.ecommerce.product.service;
 
 import java.util.List;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.ecommerce.common.entity.Category;
@@ -21,6 +23,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "products", allEntries = true)
     public Product createProduct(Product product, Long categoryId) {
         Category cat = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new IllegalArgumentException("Category not found: " + categoryId));
@@ -29,17 +32,20 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Cacheable(value = "products", key = "#id")
     public Product getProductById(Long id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found: " + id));
     }
 
     @Override
+    @Cacheable(value = "products", key = "'all'")
     public List<Product> getAllProducts() {
         return productRepository.findAll();
     }
 
     @Override
+    @Cacheable(value = "products", key = "'cat:' + #categoryId")
     public List<Product> getProductsByCategory(Long categoryId) {
         return productRepository.findByCategoryId(categoryId);
     }
@@ -51,6 +57,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "products", allEntries = true)
     public Product updateProduct(Long id, Product updated) {
         Product existing = getProductById(id);
         existing.setName(updated.getName());
@@ -63,6 +70,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "products", allEntries = true)
     public void deactivateProduct(Long id) {
         Product p = getProductById(id);
         p.setActive(false);
