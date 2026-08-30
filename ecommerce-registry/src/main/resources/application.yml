@@ -12,8 +12,19 @@ spring:
   application:
     name: ecommerce-registry
 
+# Real-world: disable self-preservation for dev (faster eviction); enable in prod
+eureka:
+  server:
+    enable-self-preservation: false
+    eviction-interval-timer-in-ms: 10000
+
 management:
   endpoints:
     web:
       exposure:
         include: health,info
+
+logging:
+  level:
+    com.netflix.eureka: OFF
+    com.netflix.discovery: OFF

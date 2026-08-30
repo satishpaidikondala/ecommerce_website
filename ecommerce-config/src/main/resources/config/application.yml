@@ -1,0 +1,15 @@
+# Shared defaults for ALL services via Config Server (native backend)
+# Services fetch this when spring.config.import=optional:configserver:http://localhost:8888
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://ecommerce-registry:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
