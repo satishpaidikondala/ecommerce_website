@@ -11,6 +11,11 @@ spring:
       spec: maximumSize=1000,expireAfterWrite=600s
   elasticsearch:
     uris: http://localhost:9200
+  minio:
+    endpoint: http://localhost:9001
+    access-key: minioadmin
+    secret-key: minioadmin
+    bucket: product-images
 
 management:
   endpoints:

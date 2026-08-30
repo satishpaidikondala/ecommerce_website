@@ -326,6 +326,19 @@ services:
     depends_on:
       - prometheus
 
+  minio:
+    image: minio/minio
+    container_name: ecommerce-minio
+    ports:
+      - "9001:9000"
+      - "9002:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
     container_name: ecommerce-elasticsearch
@@ -345,3 +358,4 @@ volumes:
   mysql_payment_data:
   mysql_cart_data:
   es_data:
+  minio_data:
