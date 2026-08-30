@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   mysql:
     image: mysql:8.0
@@ -24,10 +22,101 @@ services:
       PMA_HOST: mysql
       PMA_PORT: 3306
     ports:
-      - "8080:80"
+      - "8086:80"
     depends_on:
       mysql:
         condition: service_healthy
+
+  ecommerce-registry:
+    build: ./ecommerce-registry
+    container_name: ecommerce-registry
+    ports:
+      - "8761:8761"
+    environment:
+      - SPRING_PROFILES_ACTIVE=mysql
+
+  ecommerce-config:
+    build: ./ecommerce-config
+    container_name: ecommerce-config
+    ports:
+      - "8888:8888"
+    depends_on:
+      - ecommerce-registry
+    environment:
+      - SPRING_PROFILES_ACTIVE=mysql
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://ecommerce-registry:8761/eureka/
+
+  ecommerce-gateway:
+    build: ./ecommerce-gateway
+    container_name: ecommerce-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - ecommerce-registry
+    environment:
+      - SPRING_PROFILES_ACTIVE=h2
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://ecommerce-registry:8761/eureka/
+
+  user-service:
+    build: ./user-service
+    container_name: user-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - ecommerce-registry
+      - mysql
+    environment:
+      - SPRING_PROFILES_ACTIVE=mysql
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://ecommerce-registry:8761/eureka/
+      - JWT_SECRET=ecommerce-secret-key-that-is-at-least-32-chars-long-12345
+
+  product-service:
+    build: ./product-service
+    container_name: product-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      - ecommerce-registry
+      - mysql
+    environment:
+      - SPRING_PROFILES_ACTIVE=mysql
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://ecommerce-registry:8761/eureka/
+
+  order-service:
+    build: ./order-service
+    container_name: order-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - ecommerce-registry
+      - mysql
+    environment:
+      - SPRING_PROFILES_ACTIVE=mysql
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://ecommerce-registry:8761/eureka/
+
+  payment-service:
+    build: ./payment-service
+    container_name: payment-service
+    ports:
+      - "8084:8084"
+    depends_on:
+      - ecommerce-registry
+      - mysql
+    environment:
+      - SPRING_PROFILES_ACTIVE=mysql
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://ecommerce-registry:8761/eureka/
+
+  cart-service:
+    build: ./cart-service
+    container_name: cart-service
+    ports:
+      - "8085:8085"
+    depends_on:
+      - ecommerce-registry
+      - mysql
+    environment:
+      - SPRING_PROFILES_ACTIVE=mysql
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://ecommerce-registry:8761/eureka/
 
 volumes:
   mysql_data:

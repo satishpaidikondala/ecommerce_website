@@ -1,0 +1,11 @@
+package com.ecommerce.user.dto;
+
+import jakarta.validation.constraints.*;
+
+public class LoginRequest {
+    @Email @NotBlank private String email;
+    @NotBlank private String password;
+    public LoginRequest() {}
+    public String getEmail() { return email; } public void setEmail(String e) { this.email=e; }
+    public String getPassword() { return password; } public void setPassword(String p) { this.password=p; }
+}
