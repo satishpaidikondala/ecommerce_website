@@ -118,5 +118,15 @@ services:
       - SPRING_PROFILES_ACTIVE=mysql
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://ecommerce-registry:8761/eureka/
 
+  ecommerce-auth:
+    build: ./ecommerce-auth
+    container_name: ecommerce-auth
+    ports:
+      - "9000:9000"
+    depends_on:
+      - ecommerce-registry
+    environment:
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://ecommerce-registry:8761/eureka/
+
 volumes:
   mysql_data:
