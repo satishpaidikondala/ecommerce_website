@@ -26,6 +26,8 @@ public class ProductServiceImpl implements ProductService {
         this.searchRepository = searchRepository;
     }
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProductServiceImpl.class);
+
     private void indexProduct(Product p) {
         try {
             ProductDocument doc = new ProductDocument(
@@ -34,7 +36,11 @@ public class ProductServiceImpl implements ProductService {
                     p.getCategory() != null ? p.getCategory().getName() : null,
                     p.isActive());
             searchRepository.save(doc);
-        } catch (Exception ignored) { /* ES down in dev is ok */ }
+            log.debug("ES indexed product {}", p.getId());
+        } catch (Exception e) {
+            log.warn("ES indexing failed for product {} — will retry via fallback DB search: {}", p.getId(), e.getMessage());
+            // Real prod: publish to outbox table + async retry job or RabbitMQ product.index.retry queue
+        }
     }
 
     @Override
@@ -73,6 +79,7 @@ public class ProductServiceImpl implements ProductService {
         try {
             var docs = searchRepository.findByNameContainingOrDescriptionContaining(keyword, keyword);
             if (!docs.isEmpty()) {
+                log.debug("ES hit for '{}' — {} results", keyword, docs.size());
                 return docs.stream().map(d -> {
                     Product p = new Product();
                     p.setId(Long.valueOf(d.getId()));
@@ -84,7 +91,9 @@ public class ProductServiceImpl implements ProductService {
                     return p;
                 }).toList();
             }
-        } catch (Exception ignored) { /* fallback to DB */ }
+        } catch (Exception e) {
+            log.warn("ES search failed for '{}' — fallback to DB LIKE: {}", keyword, e.getMessage());
+        }
         return productRepository.findByNameContainingIgnoreCase(keyword);
     }
 
@@ -109,6 +118,7 @@ public class ProductServiceImpl implements ProductService {
     public void deactivateProduct(Long id) {
         Product p = getProductById(id);
         p.setActive(false);
-        productRepository.save(p);
+        Product saved = productRepository.save(p);
+        indexProduct(saved);
     }
 }
