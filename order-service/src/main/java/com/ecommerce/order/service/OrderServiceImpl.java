@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.ecommerce.common.entity.Order;
 import com.ecommerce.common.entity.OrderStatus;
-import com.ecommerce.common.entity.User;
 import com.ecommerce.common.event.OrderCreatedEvent;
 import com.ecommerce.order.dto.CreateOrderRequest;
 import com.ecommerce.order.event.OrderEventPublisher;
@@ -36,7 +35,7 @@ public class OrderServiceImpl implements OrderService {
                 .shippingState(req.getShippingState())
                 .shippingZip(req.getShippingZip())
                 .shippingCountry(req.getShippingCountry())
-                .user(User.builder().id(req.getUserId()).build())
+                .userId(req.getUserId())
                 .build();
         Order saved = orderRepository.save(order);
         eventPublisher.publishOrderCreated(new OrderCreatedEvent(

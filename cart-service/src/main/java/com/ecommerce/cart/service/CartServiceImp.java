@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ecommerce.cart.repository.CartItemRepository;
 import com.ecommerce.cart.repository.CartRepository;
 import com.ecommerce.common.entity.Cart;
-import com.ecommerce.common.entity.User;
 
 @Service
 public class CartServiceImp implements CartService {
@@ -29,7 +28,7 @@ public class CartServiceImp implements CartService {
         return cartRepository.findByUserId(userId)
                 .orElseGet(() -> cartRepository.save(
                         Cart.builder()
-                                .user(User.builder().id(userId).build())
+                                .userId(userId)
                                 .build()));
     }
 

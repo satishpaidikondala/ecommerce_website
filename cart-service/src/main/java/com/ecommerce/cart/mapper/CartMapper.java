@@ -29,7 +29,7 @@ public class CartMapper {
 
         return new CartResponse(
                 cart.getId(),
-                cart.getUser() != null ? cart.getUser().getId() : null,
+                cart.getUserId(),
                 cart.getTotalAmount(),
                 cart.getTotalItems(),
                 items,
