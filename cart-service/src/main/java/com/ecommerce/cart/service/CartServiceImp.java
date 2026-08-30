@@ -3,6 +3,8 @@ package com.ecommerce.cart.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +26,7 @@ public class CartServiceImp implements CartService {
 
     @Override
     @Transactional
+    @Cacheable(value = "carts", key = "#userId")
     public Cart getOrCreateCart(Long userId) {
         return cartRepository.findByUserId(userId)
                 .orElseGet(() -> cartRepository.save(
@@ -33,6 +36,7 @@ public class CartServiceImp implements CartService {
     }
 
     @Override
+    @Cacheable(value = "carts", key = "#userId")
     public Cart getCartByUserId(Long userId) {
         return cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException(
@@ -57,6 +61,7 @@ public class CartServiceImp implements CartService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "carts", allEntries = true)
     public void emptyCart(Long cartId) {
         // Proper version: validates existence, uses delete query, updates cart totals
         Cart cart = cartRepository.findById(cartId)
