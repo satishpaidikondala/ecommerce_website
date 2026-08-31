@@ -1,10 +1,12 @@
 import { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { CartContext } from '../context/CartContext';
 import { ShoppingBag, Heart, User, Search } from 'lucide-react';
 
 export default function Navbar() {
   const { user, setIsAuthModalOpen } = useContext(AuthContext);
+  const { cartCount } = useContext(CartContext);
 
   return (
     <div className="page-container">
@@ -19,11 +21,13 @@ export default function Navbar() {
         </div>
 
         <div className="nav-icons">
-          <div className="icon-btn">
-            <ShoppingBag size={22} strokeWidth={1.5} />
-            <div className="cart-badge">4</div>
-            <span>Cart</span>
-          </div>
+          <Link to="/cart" style={{color: 'inherit'}}>
+            <div className="icon-btn">
+              <ShoppingBag size={22} strokeWidth={1.5} />
+              {cartCount > 0 && <div className="cart-badge">{cartCount}</div>}
+              <span>Cart</span>
+            </div>
+          </Link>
           <div className="icon-btn">
             <Heart size={22} strokeWidth={1.5} />
             <span>Favorites</span>

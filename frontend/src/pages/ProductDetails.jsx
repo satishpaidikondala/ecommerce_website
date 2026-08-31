@@ -1,13 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { ShoppingBag, Heart, Truck } from 'lucide-react';
+import { CartContext } from '../context/CartContext';
 
 export default function ProductDetails() {
   const { id } = useParams();
+  const { addToCart } = useContext(CartContext);
+  
   const [product, setProduct] = useState(null);
   const [selectedColor, setSelectedColor] = useState('White');
   const [selectedSize, setSelectedSize] = useState('41');
   const [mainImage, setMainImage] = useState('');
+  const [activeTab, setActiveTab] = useState('Reviews');
+  const [added, setAdded] = useState(false);
 
   useEffect(() => {
     // High-quality mock data for the minimalist fashion aesthetic
@@ -20,10 +25,10 @@ export default function ProductDetails() {
       rating: 4.8, 
       reviewCount: 42,
       images: [
-        'https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&w=800&auto=format&fit=crop', // Minimalist shoe 1
-        'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?q=80&w=800&auto=format&fit=crop', // Minimalist shoe 2
-        'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800&auto=format&fit=crop', // Minimalist shoe 3
-        'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=800&auto=format&fit=crop', // Minimalist shoe 4
+        'https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&w=800&auto=format&fit=crop', 
+        'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?q=80&w=800&auto=format&fit=crop', 
+        'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800&auto=format&fit=crop', 
+        'https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=800&auto=format&fit=crop', 
       ],
       colors: ['White', 'Grey', 'Black'],
       sizes: ['40.5', '41', '42', '43', '43.5', '44', '44.5', '45', '46']
@@ -32,6 +37,12 @@ export default function ProductDetails() {
     setProduct(p);
     setMainImage(p.images[0]);
   }, [id]);
+
+  const handleAddToCart = () => {
+    addToCart(product, selectedColor, selectedSize);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
+  };
 
   if (!product) return <div className="page-container">Loading...</div>;
 
@@ -58,6 +69,7 @@ export default function ProductDetails() {
               <div 
                 key={idx} 
                 className={`thumb ${mainImage === img ? 'active' : ''}`}
+                onMouseEnter={() => setMainImage(img)}
                 onClick={() => setMainImage(img)}
               >
                 <img src={img} alt="thumbnail" />
@@ -116,9 +128,9 @@ export default function ProductDetails() {
           <div className="text-small" style={{color: '#a3c399', fontWeight: 500, marginTop: '1rem', cursor: 'pointer'}}>Size guide</div>
 
           <div className="action-row">
-            <button className="btn-black">
+            <button className="btn-black" onClick={handleAddToCart} style={{background: added ? '#a3c399' : '#000', color: added ? '#000' : '#fff'}}>
               <ShoppingBag size={20} strokeWidth={2} />
-              Add to cart
+              {added ? 'Added to Cart!' : 'Add to cart'}
             </button>
             <button className="btn-beige">
               <Heart size={20} strokeWidth={2} />
@@ -133,9 +145,15 @@ export default function ProductDetails() {
 
       {/* Bottom Tabs and Related Items */}
       <div className="tabs">
-        <div className="tab">Details</div>
-        <div className="tab active">Reviews</div>
-        <div className="tab">Discussion</div>
+        <div className={`tab ${activeTab === 'Details' ? 'active' : ''}`} onClick={() => setActiveTab('Details')}>Details</div>
+        <div className={`tab ${activeTab === 'Reviews' ? 'active' : ''}`} onClick={() => setActiveTab('Reviews')}>Reviews</div>
+        <div className={`tab ${activeTab === 'Discussion' ? 'active' : ''}`} onClick={() => setActiveTab('Discussion')}>Discussion</div>
+      </div>
+      
+      <div style={{marginBottom: '3rem'}}>
+        {activeTab === 'Details' && <p>Excellent running shoes. It turns very sharply on the foot. Premium materials used throughout the construction ensuring longevity and comfort.</p>}
+        {activeTab === 'Reviews' && <p><strong>Helen M.</strong> - Excellent running shoes. <br/><br/> <strong>Ann D.</strong> - Good shoes.</p>}
+        {activeTab === 'Discussion' && <p>Join the discussion about Reebok Zig Kinetica 3.</p>}
       </div>
 
       <div className="minimal-grid">
