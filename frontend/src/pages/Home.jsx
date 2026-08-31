@@ -19,8 +19,8 @@ export default function Home() {
   return (
     <div className="page-container">
       <section className="hero">
-        <h1>Discover the Extraordinary</h1>
-        <p>Premium tech and lifestyle products curated just for you.</p>
+        <h1 style={{fontSize: '3.5rem', marginBottom: '1rem', color: 'var(--text-primary)'}}>Discover the Extraordinary</h1>
+        <p style={{fontSize: '1.25rem', color: 'var(--text-secondary)', marginBottom: '2rem'}}>Premium tech and lifestyle products curated just for you.</p>
         <button className="btn-primary">Shop Now</button>
       </section>
       

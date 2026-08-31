@@ -26,7 +26,7 @@ export default function AuthModal() {
 
   return (
     <div className="modal-overlay" onClick={() => setIsAuthModalOpen(false)}>
-      <div className="glass modal-content" onClick={e => e.stopPropagation()}>
+      <div className="modal-content" onClick={e => e.stopPropagation()}>
         <h2>{isLogin ? 'Welcome Back' : 'Create Account'}</h2>
         <form onSubmit={handleSubmit} className="auth-form">
           {!isLogin && (

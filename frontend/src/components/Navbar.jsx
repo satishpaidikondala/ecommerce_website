@@ -6,7 +6,7 @@ export default function Navbar() {
   const { user, setIsAuthModalOpen, logout } = useContext(AuthContext);
 
   return (
-    <nav className="glass navbar">
+    <nav className="navbar">
       <div className="nav-brand">
         <Link to="/">E-COMMERCE</Link>
       </div>

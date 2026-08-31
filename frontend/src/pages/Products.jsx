@@ -23,9 +23,9 @@ export default function Products() {
   return (
     <div className="page-container">
       <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem'}}>
-        <h1 style={{fontSize: '2.5rem', margin: 0}}>All Products</h1>
+        <h1 style={{fontSize: '2.5rem', margin: 0, color: 'var(--text-primary)'}}>All Products</h1>
         <div style={{display: 'flex', gap: '1rem'}}>
-          <input type="text" placeholder="Search products..." className="glass" style={{padding: '0.75rem 1rem', border: '1px solid var(--glass-border)', color: 'white', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', outline: 'none'}} />
+          <input type="text" placeholder="Search products..." className="input-field" style={{width: '300px'}} />
           <button className="btn-primary">Search</button>
         </div>
       </div>

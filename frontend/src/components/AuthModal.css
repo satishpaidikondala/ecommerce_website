@@ -1,28 +1,34 @@
 .modal-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(17, 24, 39, 0.4);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  backdrop-filter: blur(5px);
-  animation: fadeIn 0.3s ease;
+  backdrop-filter: blur(2px);
+  animation: fadeIn 0.2s ease;
 }
 
 .modal-content {
-  padding: 3rem;
+  padding: 2.5rem;
   width: 100%;
   max-width: 400px;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  background-color: var(--bg-surface);
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-color);
 }
 
 .modal-content h2 {
   margin: 0;
   text-align: center;
-  font-size: 2rem;
+  font-size: 1.75rem;
+  color: var(--text-primary);
+  font-weight: 600;
 }
 
 .auth-form {
@@ -32,17 +38,19 @@
 }
 
 .auth-form input {
-  padding: 1rem;
-  border-radius: 8px;
-  border: 1px solid var(--glass-border);
-  background: rgba(255, 255, 255, 0.05);
-  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  background-color: #fff;
+  color: var(--text-primary);
   font-family: inherit;
   outline: none;
-  transition: border-color 0.3s;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-size: 0.95rem;
 }
 .auth-form input:focus {
-  border-color: var(--accent);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
 }
 
 .toggle-text {
@@ -51,9 +59,9 @@
   color: var(--text-secondary);
 }
 .toggle-link {
-  color: var(--accent);
+  color: var(--accent-link);
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 500;
 }
 .toggle-link:hover {
   text-decoration: underline;
