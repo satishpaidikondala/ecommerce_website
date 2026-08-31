@@ -1,6 +1,8 @@
 import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
+import Products from './pages/Products';
+import Cart from './pages/Cart';
 import AuthModal from './components/AuthModal';
 
 function App() {
@@ -10,8 +12,8 @@ function App() {
       <AuthModal />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/products" element={<div className="page-container"><h1>Products Page</h1></div>} />
-        <Route path="/cart" element={<div className="page-container"><h1>Cart Page</h1></div>} />
+        <Route path="/products" element={<Products />} />
+        <Route path="/cart" element={<Cart />} />
       </Routes>
     </>
   );
