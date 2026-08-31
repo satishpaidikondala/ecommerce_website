@@ -7,16 +7,13 @@ eureka:
     fetch-registry: false
   server:
     wait-time-in-ms-when-sync-empty: 0
+    # Real-world: disable self-preservation for dev (faster eviction); enable in prod
+    enable-self-preservation: false
+    eviction-interval-timer-in-ms: 10000
 
 spring:
   application:
     name: ecommerce-registry
-
-# Real-world: disable self-preservation for dev (faster eviction); enable in prod
-eureka:
-  server:
-    enable-self-preservation: false
-    eviction-interval-timer-in-ms: 10000
 
 management:
   endpoints:
