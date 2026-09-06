@@ -11,6 +11,7 @@ import com.ecommerce.product.repository.CategoryRepository;
 import com.ecommerce.product.repository.ProductRepository;
 import com.ecommerce.product.search.ProductDocument;
 import com.ecommerce.product.search.ProductSearchRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -20,7 +21,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductSearchRepository searchRepository;
 
     public ProductServiceImpl(ProductRepository productRepository, CategoryRepository categoryRepository,
-                              ProductSearchRepository searchRepository) {
+                              @Autowired(required = false) ProductSearchRepository searchRepository) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.searchRepository = searchRepository;
@@ -29,6 +30,7 @@ public class ProductServiceImpl implements ProductService {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ProductServiceImpl.class);
 
     private void indexProduct(Product p) {
+        if (searchRepository == null) return;
         try {
             ProductDocument doc = new ProductDocument(
                     String.valueOf(p.getId()), p.getName(), p.getDescription(),
@@ -39,7 +41,6 @@ public class ProductServiceImpl implements ProductService {
             log.debug("ES indexed product {}", p.getId());
         } catch (Exception e) {
             log.warn("ES indexing failed for product {} — will retry via fallback DB search: {}", p.getId(), e.getMessage());
-            // Real prod: publish to outbox table + async retry job or RabbitMQ product.index.retry queue
         }
     }
 
@@ -76,23 +77,25 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<Product> searchProducts(String keyword) {
-        try {
-            var docs = searchRepository.findByNameContainingOrDescriptionContaining(keyword, keyword);
-            if (!docs.isEmpty()) {
-                log.debug("ES hit for '{}' — {} results", keyword, docs.size());
-                return docs.stream().map(d -> {
-                    Product p = new Product();
-                    p.setId(Long.valueOf(d.getId()));
-                    p.setName(d.getName());
-                    p.setDescription(d.getDescription());
-                    p.setSku(d.getSku());
-                    p.setPrice(d.getPrice());
-                    p.setActive(d.isActive());
-                    return p;
-                }).toList();
+        if (searchRepository != null) {
+            try {
+                var docs = searchRepository.findByNameContainingOrDescriptionContaining(keyword, keyword);
+                if (!docs.isEmpty()) {
+                    log.debug("ES hit for '{}' — {} results", keyword, docs.size());
+                    return docs.stream().map(d -> {
+                        Product p = new Product();
+                        p.setId(Long.valueOf(d.getId()));
+                        p.setName(d.getName());
+                        p.setDescription(d.getDescription());
+                        p.setSku(d.getSku());
+                        p.setPrice(d.getPrice());
+                        p.setActive(d.isActive());
+                        return p;
+                    }).toList();
+                }
+            } catch (Exception e) {
+                log.warn("ES search failed for '{}' — fallback to DB LIKE: {}", keyword, e.getMessage());
             }
-        } catch (Exception e) {
-            log.warn("ES search failed for '{}' — fallback to DB LIKE: {}", keyword, e.getMessage());
         }
         return productRepository.findByNameContainingIgnoreCase(keyword);
     }
