@@ -8,16 +8,25 @@ spring:
     name: cart-service
   cache:
     type: redis
+  data:
+    redis:
+      host: localhost
+      port: 6379
   profiles:
     active: h2
 
 management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,circuitbreakers,circuitbreakerevents,retryevents,ratelimiters,ratelimiterevents,bulkheads,bulkheadevents,prometheus
   tracing:
     sampling:
       probability: 1.0
   zipkin:
     tracing:
       endpoint: http://zipkin:9411/api/v2/spans
+
 eureka:
   client:
     service-url:
@@ -25,7 +34,6 @@ eureka:
   instance:
     prefer-ip-address: true
 
-# Microservices Feature 1: Resilience4j — Circuit Breaker + Retry for product-service
 resilience4j:
   circuitbreaker:
     instances:
@@ -49,17 +57,6 @@ resilience4j:
     instances:
       productService:
         max-concurrent-calls: 20
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,circuitbreakers,circuitbreakerevents,retryevents,ratelimiters,ratelimiterevents,bulkheads,bulkheadevents
-
-  data:
-    redis:
-      host: localhost
-      port: 6379
 
 logging:
   pattern:
