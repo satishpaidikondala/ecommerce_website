@@ -28,7 +28,6 @@ public class FileStorageService {
     public String uploadFile(MultipartFile file) {
         try {
             String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
-            // Create bucket if not exists (idempotent)
             try {
                 boolean exists = minioClient.bucketExists(
                         io.minio.BucketExistsArgs.builder().bucket(bucket).build());
