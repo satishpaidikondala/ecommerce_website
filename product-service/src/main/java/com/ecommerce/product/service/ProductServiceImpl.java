@@ -1,6 +1,7 @@
 package com.ecommerce.product.service;
 
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -11,7 +12,6 @@ import com.ecommerce.product.repository.CategoryRepository;
 import com.ecommerce.product.repository.ProductRepository;
 import com.ecommerce.product.search.ProductDocument;
 import com.ecommerce.product.search.ProductSearchRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -121,7 +121,8 @@ public class ProductServiceImpl implements ProductService {
     public void deactivateProduct(Long id) {
         Product p = getProductById(id);
         p.setActive(false);
-        productRepository.save(p);
+        Product saved = productRepository.save(p);
+        indexProduct(saved);
     }
 
     @Override
