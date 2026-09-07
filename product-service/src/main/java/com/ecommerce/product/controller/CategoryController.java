@@ -47,4 +47,23 @@ public class CategoryController {
         Category updated = categoryService.updateCategory(id, c);
         return ResponseEntity.ok(new CategoryResponse(updated.getId(), updated.getName(), updated.getDescription(), updated.getImageUrl(), updated.isActive()));
     }
+
+    @PatchMapping("/{id}/deactivate")
+    public ResponseEntity<Void> deactivate(@PathVariable Long id) {
+        categoryService.deactivateCategory(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/count")
+    public ResponseEntity<Long> countByActive(@RequestParam boolean active) {
+        return ResponseEntity.ok(categoryService.countByActive(active));
+    }
+
+    @GetMapping("/updated-after")
+    public ResponseEntity<List<CategoryResponse>> getUpdatedAfter(@RequestParam String dateTime) {
+        java.time.LocalDateTime dt = java.time.LocalDateTime.parse(dateTime);
+        List<Category> list = categoryService.getCategoriesByUpdatedAtAfter(dt);
+        return ResponseEntity.ok(list.stream()
+                .map(c -> new CategoryResponse(c.getId(), c.getName(), c.getDescription(), c.getImageUrl(), c.isActive())).toList());
+    }
 }
