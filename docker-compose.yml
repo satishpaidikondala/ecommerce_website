@@ -6,7 +6,7 @@ services:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: userdb
     ports:
-      - "3306:3306"
+      - "3311:3306"
     volumes:
       - mysql_user_data:/var/lib/mysql
     healthcheck:
@@ -107,7 +107,7 @@ services:
     depends_on:
       - ecommerce-registry
     environment:
-      - SPRING_PROFILES_ACTIVE=mysql
+      - SPRING_PROFILES_ACTIVE=native
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://ecommerce-registry:8761/eureka/
 
   ecommerce-gateway:
@@ -166,7 +166,7 @@ services:
       ecommerce-registry:
         condition: service_started
       rabbitmq:
-        condition: service_healthy
+        condition: service_started
     environment:
       - SPRING_PROFILES_ACTIVE=mysql
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://ecommerce-registry:8761/eureka/
@@ -184,7 +184,7 @@ services:
       ecommerce-registry:
         condition: service_started
       rabbitmq:
-        condition: service_healthy
+        condition: service_started
     environment:
       - SPRING_PROFILES_ACTIVE=mysql
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://ecommerce-registry:8761/eureka/
@@ -349,18 +349,22 @@ services:
     volumes:
       - minio_data:/data
 
-  # elasticsearch disabled for fast dev — uncomment to enable full-text search
-  # elasticsearch:
-  #   image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
-  #   container_name: ecommerce-elasticsearch
-  #   environment:
-  #     - discovery.type=single-node
-  #     - xpack.security.enabled=false
-  #     - ES_JAVA_OPTS=-Xms512m -Xmx512m
-  #   ports:
-  #     - "9200:9200"
-  #   volumes:
-  #     - es_data:/usr/share/elasticsearch/data
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: ecommerce-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
 
 volumes:
   mysql_user_data:
@@ -368,4 +372,6 @@ volumes:
   mysql_order_data:
   mysql_payment_data:
   mysql_cart_data:
+  es_data:
   minio_data:
+
