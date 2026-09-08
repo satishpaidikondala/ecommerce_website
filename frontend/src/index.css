@@ -1,0 +1,332 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --bg-main: #ffffff;
+  --bg-soft: #f4f3ec; /* Beige for image backgrounds */
+  --bg-search: #f5f5f5;
+  --text-primary: #000000;
+  --text-secondary: #717171;
+  --accent-red: #ff4d4d;
+  --border-light: #eaeaea;
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+a:hover {
+  opacity: 0.7;
+}
+
+/* Layout */
+.page-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* Typography */
+h1, h2, h3 {
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+}
+.text-gray { color: var(--text-secondary); }
+.text-red { color: var(--accent-red); }
+.text-small { font-size: 0.85rem; }
+
+/* Navbar */
+.navbar-minimal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 0;
+  border-bottom: 1px solid var(--border-light);
+  margin-bottom: 2rem;
+}
+.nav-logo {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+.nav-links-center {
+  display: flex;
+  gap: 2rem;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+.nav-search-bar {
+  display: flex;
+  align-items: center;
+  background: var(--bg-search);
+  padding: 0.6rem 1rem;
+  border-radius: 20px;
+  width: 300px;
+}
+.nav-search-bar input {
+  border: none;
+  background: transparent;
+  outline: none;
+  margin-left: 0.5rem;
+  width: 100%;
+  font-family: 'Inter';
+}
+.nav-icons {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+.icon-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  position: relative;
+}
+.cart-badge {
+  position: absolute;
+  top: -5px;
+  right: 5px;
+  background: #facc15;
+  color: #000;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  font-weight: 700;
+}
+
+/* Product Details Layout */
+.product-view {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 4rem;
+}
+
+/* Images */
+.image-showcase {
+  background: var(--bg-soft);
+  border-radius: 12px;
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 600px;
+  margin-bottom: 1rem;
+}
+.image-showcase img {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+  filter: drop-shadow(0 20px 30px rgba(0,0,0,0.15));
+}
+.thumbnails {
+  display: flex;
+  gap: 1rem;
+}
+.thumb {
+  width: 80px;
+  height: 80px;
+  background: var(--bg-soft);
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+.thumb img {
+  max-width: 80%;
+  max-height: 80%;
+  object-fit: contain;
+}
+.thumb:hover, .thumb.active {
+  border-color: #000;
+}
+
+/* Product Info */
+.brand-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.product-title {
+  font-size: 2.2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+.stars {
+  color: #facc15;
+  letter-spacing: 2px;
+}
+.price-large {
+  font-size: 3rem;
+  font-weight: 600;
+  margin: 1.5rem 0 2rem 0;
+}
+
+/* Selectors */
+.selector-label {
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+}
+.color-swatches {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+.c-swatch {
+  width: 40px;
+  height: 40px;
+  background: var(--bg-soft);
+  border-radius: 4px;
+  border: 1px solid var(--border-light);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+.c-swatch.active { border-color: #000; }
+.c-swatch img { width: 80%; }
+
+.size-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.size-btn {
+  background: #fff;
+  border: 1px solid var(--border-light);
+  padding: 0.75rem 0;
+  text-align: center;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+.size-btn:hover {
+  border-color: #000;
+}
+.size-btn.active {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+}
+
+/* Action Buttons */
+.action-row {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+.btn-black {
+  background: #000;
+  color: #fff;
+  flex-grow: 1;
+  border: none;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 1.25rem;
+  transition: opacity 0.2s;
+}
+.btn-black:hover {
+  opacity: 0.8;
+}
+.btn-beige {
+  background: var(--bg-soft);
+  border: none;
+  width: 60px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+.btn-beige:hover {
+  filter: brightness(0.95);
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 2rem;
+  border-bottom: 1px solid var(--border-light);
+  margin-top: 4rem;
+  margin-bottom: 2rem;
+}
+.tab {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #c4c4c4;
+  padding-bottom: 0.5rem;
+  cursor: pointer;
+}
+.tab.active {
+  color: #000;
+}
+
+/* Simple Product Card (Similar Products) */
+.minimal-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 4rem;
+}
+.minimal-card {
+  text-align: center;
+}
+.minimal-card-img {
+  background: var(--bg-soft);
+  padding: 2rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.minimal-card-img img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.minimal-card h4 {
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+.minimal-card .price {
+  font-weight: 600;
+}
