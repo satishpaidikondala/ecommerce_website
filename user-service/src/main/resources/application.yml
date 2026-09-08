@@ -17,6 +17,14 @@ management:
   tracing:
     sampling:
       probability: 1.0
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:noreply@ecommerce.com}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
   zipkin:
     tracing:
       endpoint: http://zipkin:9411/api/v2/spans
