@@ -14,9 +14,14 @@ public class OrderEventListener {
 
     @RabbitListener(queues = RabbitConfig.ORDER_CREATED_QUEUE)
     public void handleOrderCreated(OrderCreatedEvent event) {
-        log.info("[{}] Received OrderCreated: orderId={}, orderNumber={}, userId={}, amount={}",
-                event.getOrderId(), event.getOrderNumber(), event.getUserId(), event.getTotalAmount(), event.getOrderId());
-        // Real-world: create pending payment, reserve inventory, send notification
-        // e.g., paymentService.createPendingPayment(event);
+        try {
+            log.info("Received OrderCreated: orderId={}, orderNumber={}, userId={}, amount={}",
+                    event.getOrderId(), event.getOrderNumber(), event.getUserId(), event.getTotalAmount());
+            // Idempotency / saga: create pending payment if not exists
+            // paymentService.createPendingPayment(event);
+        } catch (Exception e) {
+            log.error("Failed handling OrderCreated {}: {}", event.getOrderId(), e.getMessage(), e);
+            throw e;
+        }
     }
 }

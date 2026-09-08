@@ -60,7 +60,7 @@ public class AuthorizationServerConfig {
                 .clientSecret("{noop}gateway-secret")
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                .authorizationGrantType(AuthorizationGrantType.PASSWORD)
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 .scope("read")
                 .scope("write")

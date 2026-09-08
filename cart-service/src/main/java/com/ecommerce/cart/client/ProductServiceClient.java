@@ -31,7 +31,13 @@ public class ProductServiceClient {
 
     @SuppressWarnings("unused")
     private Product fallbackProduct(Long productId, Throwable t) {
-        throw new IllegalArgumentException(
+        // Preserve original fallback behavior but avoid mapping to 404; log and throw service-unavailable
+        org.slf4j.LoggerFactory.getLogger(ProductServiceClient.class)
+                .warn("Product service fallback for id {}: {}", productId, t.toString());
+        if (t instanceof io.github.resilience4j.ratelimiter.RequestNotPermitted) {
+            throw new IllegalStateException("Rate limit exceeded for product service, try again later");
+        }
+        throw new IllegalStateException(
                 "Product service unavailable for id " + productId + " — please try again");
     }
 }

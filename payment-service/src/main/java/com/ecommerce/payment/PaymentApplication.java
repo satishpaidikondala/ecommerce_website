@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication(scanBasePackages = {"com.ecommerce.payment", "com.ecommerce.common"})
 @EnableDiscoveryClient
-@EntityScan("com.ecommerce.common.entity")
+@EntityScan({"com.ecommerce.common.entity","com.ecommerce.payment.entity"})
 @EnableJpaRepositories(basePackages = {"com.ecommerce.payment.repository"})
 public class PaymentApplication {
 

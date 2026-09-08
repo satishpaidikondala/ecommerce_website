@@ -38,8 +38,9 @@ public class PaymentController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PaymentResponse>> getByStatus(@RequestParam PaymentStatus status) {
-        return ResponseEntity.ok(paymentService.getPaymentsByStatus(status).stream().map(PaymentMapper::toResponse).toList());
+    public ResponseEntity<List<PaymentResponse>> getByStatus(@RequestParam(required = false) PaymentStatus status) {
+        if (status != null) return ResponseEntity.ok(paymentService.getPaymentsByStatus(status).stream().map(PaymentMapper::toResponse).toList());
+        return ResponseEntity.ok(paymentService.getPaymentsByStatus(PaymentStatus.SUCCESS).stream().map(PaymentMapper::toResponse).toList());
     }
 
     @PatchMapping("/{id}/status")

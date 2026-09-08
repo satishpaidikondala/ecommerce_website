@@ -26,17 +26,20 @@ public class CartServiceImp implements CartService {
 
     @Override
     @Transactional
-    @Cacheable(value = "carts", key = "#userId")
+    @Cacheable(value = "carts", key = "#userId", unless = "#result == null")
     public Cart getOrCreateCart(Long userId) {
         return cartRepository.findByUserId(userId)
                 .orElseGet(() -> cartRepository.save(
                         Cart.builder()
                                 .userId(userId)
+                                .totalAmount(java.math.BigDecimal.ZERO)
+                                .totalItems(0)
                                 .build()));
     }
 
     @Override
-    @Cacheable(value = "carts", key = "#userId")
+    @Transactional(readOnly = true)
+    @Cacheable(value = "carts", key = "#userId", unless = "#result == null")
     public Cart getCartByUserId(Long userId) {
         return cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException(
@@ -66,7 +69,9 @@ public class CartServiceImp implements CartService {
         Cart cart = cartRepository.findById(cartId)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Cart not found with id: " + cartId));
-        cartItemRepository.deleteByCartId(cartId);
+        cartItemRepository.deleteByCart_Id(cartId);
+        // clear persistence context list to avoid stale items
+        if (cart.getItems() != null) cart.getItems().clear();
         cart.setTotalItems(0);
         cart.setTotalAmount(java.math.BigDecimal.ZERO);
         cartRepository.save(cart);

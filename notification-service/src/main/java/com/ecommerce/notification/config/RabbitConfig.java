@@ -1,6 +1,8 @@
 package com.ecommerce.notification.config;
 
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,4 +18,5 @@ public class RabbitConfig {
         return BindingBuilder.bind(orderCreatedQueue).to(exchange).with(ORDER_CREATED_KEY);
     }
     @Bean public Jackson2JsonMessageConverter messageConverter() { return new Jackson2JsonMessageConverter(); }
+    @Bean public RabbitTemplate rabbitTemplate(ConnectionFactory cf, Jackson2JsonMessageConverter mc){ RabbitTemplate t=new RabbitTemplate(cf); t.setMessageConverter(mc); return t; }
 }

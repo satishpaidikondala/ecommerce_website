@@ -2,8 +2,10 @@ package com.ecommerce.product.controller;
 
 import java.util.List;
 import jakarta.validation.Valid;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import com.ecommerce.common.entity.Category;
 import com.ecommerce.product.dto.CategoryRequest;
@@ -21,6 +23,7 @@ public class CategoryController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CategoryResponse> create(@Valid @RequestBody CategoryRequest req) {
         Category c = Category.builder().name(req.getName()).description(req.getDescription()).imageUrl(req.getImageUrl()).build();
         Category saved = categoryService.createCategory(c);
@@ -42,13 +45,15 @@ public class CategoryController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CategoryResponse> update(@PathVariable Long id, @RequestBody CategoryRequest req) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<CategoryResponse> update(@PathVariable Long id, @Valid @RequestBody CategoryRequest req) {
         Category c = Category.builder().name(req.getName()).description(req.getDescription()).imageUrl(req.getImageUrl()).build();
         Category updated = categoryService.updateCategory(id, c);
         return ResponseEntity.ok(new CategoryResponse(updated.getId(), updated.getName(), updated.getDescription(), updated.getImageUrl(), updated.isActive()));
     }
 
     @PatchMapping("/{id}/deactivate")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deactivate(@PathVariable Long id) {
         categoryService.deactivateCategory(id);
         return ResponseEntity.noContent().build();
@@ -60,8 +65,8 @@ public class CategoryController {
     }
 
     @GetMapping("/updated-after")
-    public ResponseEntity<List<CategoryResponse>> getUpdatedAfter(@RequestParam String dateTime) {
-        java.time.LocalDateTime dt = java.time.LocalDateTime.parse(dateTime);
+    public ResponseEntity<List<CategoryResponse>> getUpdatedAfter(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime dateTime) {
+        java.time.LocalDateTime dt = dateTime;
         List<Category> list = categoryService.getCategoriesByUpdatedAtAfter(dt);
         return ResponseEntity.ok(list.stream()
                 .map(c -> new CategoryResponse(c.getId(), c.getName(), c.getDescription(), c.getImageUrl(), c.isActive())).toList());

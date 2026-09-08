@@ -38,7 +38,8 @@ public class OrderController {
     }
 
     @GetMapping
-    public ResponseEntity<List<OrderResponse>> getByStatus(@RequestParam OrderStatus status) {
+    public ResponseEntity<List<OrderResponse>> getByStatus(@RequestParam(required = false) OrderStatus status) {
+        if (status == null) return ResponseEntity.ok(List.of());
         return ResponseEntity.ok(orderService.getOrdersByStatus(status).stream().map(OrderMapper::toResponse).toList());
     }
 
@@ -53,8 +54,13 @@ public class OrderController {
     }
 
     @GetMapping("/{id}/items")
-    public ResponseEntity<java.util.List<com.ecommerce.common.entity.OrderItem>> getItems(@PathVariable Long id) {
-        return ResponseEntity.ok(orderService.getOrderItems(id));
+    public ResponseEntity<List<com.ecommerce.order.dto.OrderItemResponse>> getItems(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.getOrderItems(id).stream()
+            .map(i -> new com.ecommerce.order.dto.OrderItemResponse(
+                i.getProduct()!=null?i.getProduct().getId():null,
+                i.getProduct()!=null?i.getProduct().getName():null,
+                i.getQuantity(), i.getPrice(), i.getSubtotal()))
+            .toList());
     }
 
     @GetMapping("/{id}/invoice")

@@ -3,6 +3,7 @@ package com.ecommerce.user.service;
 import java.time.Duration;
 import java.util.Random;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -16,27 +17,29 @@ public class OtpService {
     private final String fromEmail;
     private static final long TTL_SECONDS = 300;
 
-    public OtpService(StringRedisTemplate redisTemplate, JavaMailSender mailSender,
+    public OtpService(StringRedisTemplate redisTemplate,
+                      JavaMailSender mailSender,
                       @Value("${spring.mail.username:noreply@ecommerce.com}") String fromEmail) {
         this.redisTemplate = redisTemplate;
         this.mailSender = mailSender;
         this.fromEmail = fromEmail;
     }
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OtpService.class);
+
     public String generateOtp(String email) {
         String code = String.format("%06d", new Random().nextInt(1_000_000));
         redisTemplate.opsForValue().set(email, code, Duration.ofSeconds(TTL_SECONDS));
-        // Prod: real email via SMTP (Gmail SES) — same SETEX before send
         try {
             SimpleMailMessage msg = new SimpleMailMessage();
             msg.setFrom(fromEmail);
             msg.setTo(email);
-            msg.setSubject("Your GramSetu OTP");
+            msg.setSubject("Your OTP");
             msg.setText("Your OTP is: " + code + " (expires in 5 minutes)");
             mailSender.send(msg);
+            log.info("OTP sent to {} via mail", email);
         } catch (Exception e) {
-            // Dev fallback: log if SMTP not configured
-            System.out.println("[2FA] OTP for " + email + ": " + code + " (mail failed: " + e.getMessage() + ")");
+            log.warn("Mail failed for {}: {}", email, e.getMessage());
         }
         return code;
     }

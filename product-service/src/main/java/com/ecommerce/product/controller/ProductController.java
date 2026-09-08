@@ -9,8 +9,10 @@ import org.springframework.web.bind.annotation.*;
 import com.ecommerce.common.entity.Product;
 import com.ecommerce.product.dto.CreateProductRequest;
 import com.ecommerce.product.dto.ProductResponse;
+import com.ecommerce.product.dto.UpdateProductRequest;
 import com.ecommerce.product.mapper.ProductMapper;
 import com.ecommerce.product.service.ProductService;
+import com.ecommerce.common.entity.Category;
 
 @RestController
 @RequestMapping("/api/products")
@@ -59,8 +61,20 @@ public class ProductController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ProductResponse> update(@PathVariable Long id, @RequestBody Product updated) {
-        return ResponseEntity.ok(ProductMapper.toResponse(productService.updateProduct(id, updated)));
+    public ResponseEntity<ProductResponse> update(@PathVariable Long id, @Valid @RequestBody UpdateProductRequest req) {
+        Product p = new Product();
+        p.setName(req.getName());
+        p.setDescription(req.getDescription());
+        p.setPrice(req.getPrice());
+        p.setImageUrl(req.getImageUrl());
+        p.setUnitsInStock(req.getUnitsInStock());
+        p.setSku(req.getSku());
+        if (req.getCategoryId() != null) {
+            Category cat = new Category();
+            cat.setId(req.getCategoryId());
+            p.setCategory(cat);
+        }
+        return ResponseEntity.ok(ProductMapper.toResponse(productService.updateProduct(id, p)));
     }
 
     @PatchMapping("/{id}/deactivate")

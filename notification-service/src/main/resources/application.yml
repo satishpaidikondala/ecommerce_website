@@ -1,6 +1,8 @@
 server:
   port: 8090
 spring:
+  config:
+    import: optional:configserver:http://localhost:8888
   application:
     name: notification-service
   rabbitmq:
@@ -8,6 +10,11 @@ spring:
     port: 5672
     username: guest
     password: guest
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+  jpa:
+    open-in-view: false
 eureka:
   client:
     service-url:

@@ -15,13 +15,15 @@ import com.ecommerce.common.entity.CartItem;
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
 
     // Q3: Get all items in a cart
-    List<CartItem> findByCartId(Long cartId);
+    List<CartItem> findByCart_Id(Long cartId);
 
     // Q4: Find specific product in cart
-    Optional<CartItem> findByCartIdAndProductId(Long cartId, Long productId);
+    Optional<CartItem> findByCart_IdAndProduct_Id(Long cartId, Long productId);
 
     // Q6: Delete all items in a cart (empty cart)
-    void deleteByCartId(Long cartId);
+    @Modifying
+    @org.springframework.transaction.annotation.Transactional
+    void deleteByCart_Id(Long cartId);
 
     // Q7: Count items by user and product
     @Query("SELECT ci.quantity FROM CartItem ci WHERE ci.cart.id = :cartId AND ci.product.id = :productId")

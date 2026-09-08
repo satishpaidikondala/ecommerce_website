@@ -21,12 +21,17 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @Transactional
     public Payment createPayment(CreatePaymentRequest req) {
+        if (paymentRepository.findByOrderId(req.getOrderId()).isPresent()) {
+            throw new IllegalArgumentException("Payment already exists for order: " + req.getOrderId());
+        }
         Payment p = Payment.builder()
                 .paymentNumber("PAY-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase())
                 .transactionId(UUID.randomUUID().toString())
                 .paymentMethod(req.getPaymentMethod())
                 .amount(req.getAmount())
                 .orderId(req.getOrderId())
+                .status(com.ecommerce.common.entity.PaymentStatus.PENDING)
+                .paymentDate(java.time.LocalDateTime.now())
                 .build();
         return paymentRepository.save(p);
     }
@@ -60,6 +65,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     public Payment refundPayment(Long id) {
         Payment p = getPaymentById(id);
+        if (p.getStatus() == PaymentStatus.REFUNDED) return p;
         if (p.getStatus() != PaymentStatus.SUCCESS) throw new IllegalArgumentException("Only successful payments can be refunded");
         p.setStatus(PaymentStatus.REFUNDED);
         return paymentRepository.save(p);

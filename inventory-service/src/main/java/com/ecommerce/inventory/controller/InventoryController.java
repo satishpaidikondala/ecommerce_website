@@ -13,13 +13,14 @@ public class InventoryController {
 
     @GetMapping("/product/{productId}")
     public ResponseEntity<Inventory> getStock(@PathVariable Long productId) {
-        return ResponseEntity.ok(repo.findById(productId).orElse(
-                Inventory.builder().productId(productId).stock(0).reserved(0).build()));
+        return ResponseEntity.of(repo.findById(productId));
     }
 
     @PutMapping("/product/{productId}")
     public ResponseEntity<Inventory> updateStock(@PathVariable Long productId, @RequestParam int stock) {
-        Inventory inv = repo.findById(productId).orElse(Inventory.builder().productId(productId).stock(0).reserved(0).build());
+        if (stock < 0) throw new IllegalArgumentException("Stock cannot be negative");
+        Inventory inv = repo.findById(productId).orElseGet(() -> Inventory.builder().productId(productId).stock(0).reserved(0).build());
+        // TODO: validate productId exists via product-service before creating inventory
         inv.setStock(stock);
         return ResponseEntity.ok(repo.save(inv));
     }

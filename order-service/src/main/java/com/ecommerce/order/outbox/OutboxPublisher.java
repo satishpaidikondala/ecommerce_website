@@ -23,10 +23,11 @@ public class OutboxPublisher {
         this.objectMapper = objectMapper;
     }
 
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelay = 5000, initialDelay = 10000)
     @Transactional
     public void publishPending() {
-        var events = outboxRepository.findByPublishedFalse();
+        var pageable = org.springframework.data.domain.PageRequest.of(0, 100);
+        var events = outboxRepository.findByPublishedFalse(pageable);
         for (var e : events) {
             try {
                 OrderCreatedEvent evt = objectMapper.readValue(e.getPayload(), OrderCreatedEvent.class);

@@ -19,7 +19,12 @@ public class OrderEventListener {
 
     @RabbitListener(queues = RabbitConfig.ORDER_CREATED_QUEUE)
     public void onOrderCreated(OrderCreatedEvent event) {
-        log.info("[{}] Notification received OrderCreated: {}", event.getOrderNumber(), event.getOrderId());
-        notificationService.sendOrderConfirmation(event.getUserId(), event.getOrderNumber());
+        try {
+            log.info("Notification received OrderCreated: orderId={}, orderNumber={}, userId={}", event.getOrderId(), event.getOrderNumber(), event.getUserId());
+            notificationService.sendOrderConfirmation(event.getUserId(), event.getOrderNumber());
+        } catch (Exception e) {
+            log.error("Notification handling failed for order {}: {}", event.getOrderNumber(), e.getMessage(), e);
+            // swallow to prevent infinite requeue; could send to DLQ
+        }
     }
 }

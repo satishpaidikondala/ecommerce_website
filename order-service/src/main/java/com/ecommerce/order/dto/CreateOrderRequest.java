@@ -6,8 +6,8 @@ import jakarta.validation.constraints.NotNull;
 public class CreateOrderRequest {
     @NotNull private Long userId;
     @NotBlank private String shippingAddress;
-    private String shippingCity; private String shippingState;
-    private String shippingZip; private String shippingCountry;
+    @NotBlank private String shippingCity; private String shippingState;
+    @NotBlank private String shippingZip; @NotBlank private String shippingCountry;
     public CreateOrderRequest() {}
     public Long getUserId() { return userId; } public void setUserId(Long u) { this.userId=u; }
     public String getShippingAddress() { return shippingAddress; } public void setShippingAddress(String s) { this.shippingAddress=s; }

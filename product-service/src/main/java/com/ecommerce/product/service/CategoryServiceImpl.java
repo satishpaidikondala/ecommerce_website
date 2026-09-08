@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import com.ecommerce.common.entity.Category;
 import com.ecommerce.product.repository.CategoryRepository;
 
@@ -32,7 +33,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<Category> searchCategories(String keyword) {
-        return categoryRepository.findByNameContainingIgnoreCase(keyword);
+        return categoryRepository.searchCategories(keyword);
     }
 
     @Override
@@ -41,26 +42,29 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional
     @CacheEvict(value = "categories", allEntries = true)
     public Category createCategory(Category c) {
         if (categoryRepository.existsByName(c.getName())) {
             throw new IllegalArgumentException("Category exists: " + c.getName());
         }
         c.setActive(true);
-        return categoryRepository.save(c);
+        try { return categoryRepository.save(c); } catch (org.springframework.dao.DataIntegrityViolationException e) { throw new IllegalArgumentException("Category exists: " + c.getName()); }
     }
 
     @Override
+    @Transactional
     @CacheEvict(value = "categories", allEntries = true)
     public Category updateCategory(Long id, Category updated) {
         Category existing = getCategoryById(id);
-        existing.setName(updated.getName());
-        existing.setDescription(updated.getDescription());
-        existing.setImageUrl(updated.getImageUrl());
+        if (updated.getName() != null) existing.setName(updated.getName());
+        if (updated.getDescription() != null) existing.setDescription(updated.getDescription());
+        if (updated.getImageUrl() != null) existing.setImageUrl(updated.getImageUrl());
         return categoryRepository.save(existing);
     }
 
     @Override
+    @Transactional
     @CacheEvict(value = "categories", allEntries = true)
     public void deactivateCategory(Long id) {
         Category cat = getCategoryById(id);

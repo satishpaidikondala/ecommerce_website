@@ -22,7 +22,7 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/actuator/**", "/h2-console/**").permitAll()
-                .anyRequest().permitAll()
+                .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
             .headers(h -> h.frameOptions(f -> f.disable()));

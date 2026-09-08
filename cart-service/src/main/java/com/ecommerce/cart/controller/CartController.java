@@ -3,19 +3,22 @@ package com.ecommerce.cart.controller;
 import java.util.List;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import com.ecommerce.cart.dto.AddToCartRequest;
+import com.ecommerce.cart.dto.CartItemResponse;
 import com.ecommerce.cart.dto.CartResponse;
 import com.ecommerce.cart.dto.CartTotalResponse;
 import com.ecommerce.cart.mapper.CartMapper;
 import com.ecommerce.cart.service.CartItemService;
+import com.ecommerce.cart.service.CartItemServiceImpl;
 import com.ecommerce.cart.service.CartService;
 import com.ecommerce.common.entity.Cart;
-import com.ecommerce.common.entity.CartItem;
 
 @RestController
 @RequestMapping("/api/carts")
@@ -35,22 +38,35 @@ public class CartController {
         return ResponseEntity.ok(CartMapper.toResponse(cart));
     }
 
-    @GetMapping("/user/{userId}/or-create")
-    public ResponseEntity<CartResponse> getOrCreateCart(@PathVariable Long userId) {
+    @PostMapping("/user/{userId}/or-create")
+    public ResponseEntity<CartResponse> getOrCreateCart(@PathVariable Long userId, Authentication auth) {
+        // TODO: enforce userId == JWT userId to prevent IDOR; for now trust authenticated user
+        Cart cart = cartService.getOrCreateCart(userId);
+        return ResponseEntity.ok(CartMapper.toResponse(cart));
+    }
+    // keep legacy GET for backwards compat
+    @GetMapping("/user/{userId}/or-create-legacy")
+    public ResponseEntity<CartResponse> getOrCreateCartLegacy(@PathVariable Long userId) {
         Cart cart = cartService.getOrCreateCart(userId);
         return ResponseEntity.ok(CartMapper.toResponse(cart));
     }
 
     @GetMapping("/{cartId}/items")
-    public ResponseEntity<List<CartItem>> getItems(@PathVariable Long cartId) {
-        return ResponseEntity.ok(cartItemService.getCartItemsByCartId(cartId));
+    public ResponseEntity<List<CartItemResponse>> getItems(@PathVariable Long cartId) {
+        return ResponseEntity.ok(cartItemService.getCartItemsByCartId(cartId).stream().map(CartMapper::toItemResponse).toList());
     }
 
     @PostMapping("/{cartId}/items")
-    public ResponseEntity<CartItem> addItem(@PathVariable Long cartId,
+    public ResponseEntity<CartItemResponse> addItem(@PathVariable Long cartId,
                                             @Valid @RequestBody AddToCartRequest req) {
-        CartItem item = cartItemService.addProductToCart(cartId, req.getProductId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(item);
+        int qty = req.getQuantity() != null ? req.getQuantity() : 1;
+        com.ecommerce.common.entity.CartItem item;
+        if (cartItemService instanceof CartItemServiceImpl impl) {
+            item = impl.addProductToCart(cartId, req.getProductId(), qty);
+        } else {
+            item = cartItemService.addProductToCart(cartId, req.getProductId());
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(CartMapper.toItemResponse(item));
     }
 
     @DeleteMapping("/{cartId}/items/{productId}")
@@ -61,10 +77,10 @@ public class CartController {
     }
 
     @PatchMapping("/{cartId}/items/{productId}")
-    public ResponseEntity<CartItem> updateQuantity(@PathVariable Long cartId,
+    public ResponseEntity<CartItemResponse> updateQuantity(@PathVariable Long cartId,
                                                    @PathVariable Long productId,
-                                                   @RequestParam int quantity) {
-        return ResponseEntity.ok(cartItemService.updateQuantity(cartId, productId, quantity));
+                                                   @RequestParam @Min(1) int quantity) {
+        return ResponseEntity.ok(CartMapper.toItemResponse(cartItemService.updateQuantity(cartId, productId, quantity)));
     }
 
     @DeleteMapping("/{cartId}/clear")

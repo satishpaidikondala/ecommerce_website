@@ -13,12 +13,11 @@ public class OrderEventListener {
     private final InventoryService inventoryService;
     public OrderEventListener(InventoryService inventoryService) { this.inventoryService = inventoryService; }
 
-    @RabbitListener(queues = "inventory.order.created.queue")
+    @RabbitListener(queues = com.ecommerce.inventory.config.RabbitConfig.ORDER_CREATED_QUEUE)
     public void onOrderCreated(OrderCreatedEvent event) {
-        // Saga step 1: reserve stock (simplified: assume 1 unit per order for Gram Setu produce)
-        boolean ok = inventoryService.reserveStock(event.getOrderId(), 1);
-        if (ok) log.info("Saga: stock reserved for order {}", event.getOrderNumber());
-        else log.warn("Saga: stock insufficient for order {} — compensate: cancel order", event.getOrderNumber());
-        // Real saga: publish StockReserved / StockFailed event for next step (payment)
+        // OrderCreatedEvent currently carries no product list; inventory reservation
+        // would require productId/qty. Log event and skip phantom reservation.
+        log.info("Inventory received OrderCreated: orderId={}, orderNumber={} — no product items in event, skipping stock reservation", event.getOrderId(), event.getOrderNumber());
+        // TODO: extend OrderCreatedEvent to include List<OrderItem> and iterate reserveStock(productId, qty)
     }
 }

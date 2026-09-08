@@ -37,5 +37,5 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
     );
 
     // Q7: Find by payment number (unique)
-    Payment findByPaymentNumber(String paymentNumber);
+    java.util.Optional<Payment> findByPaymentNumber(String paymentNumber);
 }

@@ -46,7 +46,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "products", allEntries = true)
+    @CacheEvict(value = {"products","productsByCategory"}, allEntries = true)
     public Product createProduct(Product product, Long categoryId) {
         Category cat = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new IllegalArgumentException("Category not found: " + categoryId));
@@ -57,22 +57,25 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Cacheable(value = "products", key = "#id")
+    @Transactional(readOnly = true)
+    @Cacheable(value = "products", key = "#id", unless = "#result == null")
     public Product getProductById(Long id) {
         return productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found: " + id));
     }
 
     @Override
+    @Transactional(readOnly = true)
     @Cacheable(value = "products", key = "'all'")
     public List<Product> getAllProducts() {
         return productRepository.findAll();
     }
 
     @Override
-    @Cacheable(value = "products", key = "'cat:' + #categoryId")
+    @Transactional(readOnly = true)
+    @Cacheable(value = "productsByCategory", key = "#categoryId")
     public List<Product> getProductsByCategory(Long categoryId) {
-        return productRepository.findByCategoryId(categoryId);
+        return productRepository.findByCategory_Id(categoryId);
     }
 
     @Override
@@ -90,6 +93,10 @@ public class ProductServiceImpl implements ProductService {
                         p.setSku(d.getSku());
                         p.setPrice(d.getPrice());
                         p.setActive(d.isActive());
+                        p.setUnitsInStock(0);
+                        p.setImageUrl(null);
+                        p.setCreatedAt(null);
+                        p.setUpdatedAt(null);
                         return p;
                     }).toList();
                 }
@@ -97,19 +104,22 @@ public class ProductServiceImpl implements ProductService {
                 log.warn("ES search failed for '{}' — fallback to DB LIKE: {}", keyword, e.getMessage());
             }
         }
-        return productRepository.findByNameContainingIgnoreCase(keyword);
+        return productRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "products", allEntries = true)
+    @CacheEvict(value = {"products","productsByCategory"}, allEntries = true)
     public Product updateProduct(Long id, Product updated) {
         Product existing = getProductById(id);
-        existing.setName(updated.getName());
-        existing.setDescription(updated.getDescription());
-        existing.setPrice(updated.getPrice());
-        existing.setUnitsInStock(updated.getUnitsInStock());
-        existing.setImageUrl(updated.getImageUrl());
+        if (updated.getName() != null) existing.setName(updated.getName());
+        if (updated.getDescription() != null) existing.setDescription(updated.getDescription());
+        if (updated.getPrice() != null) existing.setPrice(updated.getPrice());
+        if (updated.getUnitsInStock() != null) existing.setUnitsInStock(updated.getUnitsInStock());
+        if (updated.getImageUrl() != null) existing.setImageUrl(updated.getImageUrl());
+        if (updated.getSku() != null) existing.setSku(updated.getSku());
+        if (updated.getCategory() != null) existing.setCategory(updated.getCategory());
+        // active flag handled via dedicated deactivate/activate endpoint
         Product saved = productRepository.save(existing);
         indexProduct(saved);
         return saved;
@@ -117,7 +127,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "products", allEntries = true)
+    @CacheEvict(value = {"products","productsByCategory"}, allEntries = true)
     public void deactivateProduct(Long id) {
         Product p = getProductById(id);
         p.setActive(false);
@@ -127,9 +137,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "products", allEntries = true)
+    @CacheEvict(value = {"products","productsByCategory"}, allEntries = true)
     public void deleteProduct(Long id) {
         productRepository.deleteById(id);
+        if (searchRepository != null) {
+            try { searchRepository.deleteById(String.valueOf(id)); } catch (Exception e) { log.warn("ES delete failed for {}: {}", id, e.getMessage()); }
+        }
     }
 
     @Override

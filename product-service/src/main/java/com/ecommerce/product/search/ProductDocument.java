@@ -6,7 +6,7 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
-@Document(indexName = "products")
+@Document(indexName = "products", createIndex = true)
 public class ProductDocument {
 
     @Id
@@ -15,13 +15,13 @@ public class ProductDocument {
     @Field(type = FieldType.Text, analyzer = "standard")
     private String name;
 
-    @Field(type = FieldType.Text)
+    @Field(type = FieldType.Text, analyzer = "standard")
     private String description;
 
     @Field(type = FieldType.Keyword)
     private String sku;
 
-    @Field(type = FieldType.Double)
+    @Field(type = FieldType.Scaled_Float, scalingFactor = 100)
     private BigDecimal price;
 
     @Field(type = FieldType.Keyword)

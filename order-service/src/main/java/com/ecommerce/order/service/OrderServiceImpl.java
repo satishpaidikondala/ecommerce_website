@@ -40,7 +40,7 @@ public class OrderServiceImpl implements OrderService {
                 .shippingCountry(req.getShippingCountry())
                 .userId(req.getUserId())
                 .build();
-        Order saved = orderRepository.save(order);
+        Order saved = orderRepository.saveAndFlush(order);
         try {
             String payload = objectMapper.writeValueAsString(new com.ecommerce.common.event.OrderCreatedEvent(
                     saved.getId(), saved.getOrderNumber(), req.getUserId(),
@@ -53,17 +53,20 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Order getOrderById(Long id) {
         return orderRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Order not found: " + id));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Order> getOrdersByUserId(Long userId) {
         return orderRepository.findByUserId(userId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Order> getOrdersByStatus(OrderStatus status) {
         return orderRepository.findByStatus(status);
     }
@@ -80,6 +83,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public Order cancelOrder(Long id) {
         Order order = getOrderById(id);
+        if (order.getStatus() == OrderStatus.CANCELLED) return order;
         if (order.getStatus() == OrderStatus.SHIPPED || order.getStatus() == OrderStatus.DELIVERED)
             throw new IllegalArgumentException("Cannot cancel shipped/delivered order");
         order.setStatus(OrderStatus.CANCELLED);
@@ -87,11 +91,13 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public java.util.List<com.ecommerce.common.entity.OrderItem> getOrderItems(Long id) {
         return getOrderById(id).getOrderItems();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public com.ecommerce.order.dto.OrderResponse getInvoice(Long id) {
         return com.ecommerce.order.mapper.OrderMapper.toResponse(getOrderById(id));
     }

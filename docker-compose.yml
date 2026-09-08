@@ -131,11 +131,18 @@ services:
         condition: service_healthy
       ecommerce-registry:
         condition: service_started
+      redis:
+        condition: service_healthy
     environment:
       - SPRING_PROFILES_ACTIVE=mysql
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://ecommerce-registry:8761/eureka/
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-user:3306/userdb?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATA_REDIS_HOST=redis
       - JWT_SECRET=ecommerce-secret-key-that-is-at-least-32-chars-long-12345
+      - MAIL_HOST=smtp.gmail.com
+      - MAIL_PORT=587
+      - MAIL_USERNAME=satishpaidikondala22@gmail.com
+      - "MAIL_PASSWORD=ipuwonkiaozpvpda"
 
   product-service:
     build: ./product-service

@@ -31,15 +31,8 @@ public class JwtAuthenticationGlobalFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
         boolean isOpen = OPEN_PATHS.stream().anyMatch(path::startsWith);
-        // Allow POST /api/users (registration) without token; all other /api/** need token
-        if (isOpen && (path.equals("/api/users") || !path.startsWith("/api/"))) {
-            return chain.filter(exchange);
-        }
-        if (isOpen && path.startsWith("/api/auth/")) {
-            return chain.filter(exchange);
-        }
-        // For protected /api/** paths, require Authorization header
-        if (!path.startsWith("/api/")) {
+        // Allow open paths without token
+        if (isOpen || !path.startsWith("/api/")) {
             return chain.filter(exchange);
         }
         String auth = exchange.getRequest().getHeaders().getFirst("Authorization");

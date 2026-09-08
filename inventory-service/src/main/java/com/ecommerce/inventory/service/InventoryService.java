@@ -12,9 +12,9 @@ public class InventoryService {
 
     @Transactional
     public boolean reserveStock(Long productId, int quantity) {
-        Inventory inv = repo.findById(productId).orElse(
-                com.ecommerce.inventory.entity.Inventory.builder().productId(productId).stock(100).reserved(0).build());
-        int available = inv.getStock() - inv.getReserved();
+        Inventory inv = repo.findById(productId).orElse(null);
+        if (inv == null) return false;
+        int available = (inv.getStock()!=null?inv.getStock():0) - (inv.getReserved()!=null?inv.getReserved():0);
         if (available < quantity) return false;
         inv.setReserved(inv.getReserved() + quantity);
         repo.save(inv);
@@ -23,16 +23,19 @@ public class InventoryService {
 
     @Transactional
     public void confirmStock(Long productId, int quantity) {
-        Inventory inv = repo.findById(productId).orElseThrow();
+        Inventory inv = repo.findById(productId).orElseThrow(() -> new IllegalArgumentException("Inventory not found "+productId));
+        if (quantity > inv.getStock() || quantity > inv.getReserved()) throw new IllegalArgumentException("Insufficient stock/reserved");
         inv.setStock(inv.getStock() - quantity);
-        inv.setReserved(inv.getReserved() - quantity);
+        inv.setReserved(Math.max(0, inv.getReserved() - quantity));
         repo.save(inv);
     }
 
     @Transactional
     public void releaseStock(Long productId, int quantity) {
-        Inventory inv = repo.findById(productId).orElseThrow();
-        inv.setReserved(inv.getReserved() - quantity);
+        Inventory inv = repo.findById(productId).orElseThrow(() -> new IllegalArgumentException("Inventory not found "+productId));
+        int newReserved = inv.getReserved() - quantity;
+        if (newReserved < 0) newReserved = 0;
+        inv.setReserved(newReserved);
         repo.save(inv);
     }
 }

@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @SpringBootApplication(scanBasePackages = {"com.ecommerce.product", "com.ecommerce.common"})
 @EnableDiscoveryClient
 @EnableCaching
-@EntityScan("com.ecommerce.common.entity")
+@EntityScan({"com.ecommerce.common.entity","com.ecommerce.product.entity"})
 @EnableJpaRepositories(basePackages = {"com.ecommerce.product.repository"})
 public class ProductApplication {
 

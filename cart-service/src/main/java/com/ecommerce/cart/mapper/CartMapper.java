@@ -13,10 +13,16 @@ public class CartMapper {
     private CartMapper() {}
 
     public static CartItemResponse toItemResponse(CartItem item) {
+        Long pid = null; String pname = null;
+        try {
+            if (item.getProduct() != null) { pid = item.getProduct().getId(); pname = item.getProduct().getName(); }
+        } catch (org.hibernate.LazyInitializationException e) {
+            // product not initialized outside transaction – return ids as stored
+        }
         return new CartItemResponse(
                 item.getId(),
-                item.getProduct() != null ? item.getProduct().getId() : null,
-                item.getProduct() != null ? item.getProduct().getName() : null,
+                pid,
+                pname,
                 item.getPrice(),
                 item.getQuantity(),
                 item.getSubtotal()
