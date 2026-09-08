@@ -27,8 +27,8 @@ public class AuthController {
 
     @PostMapping("/send-otp")
     public ResponseEntity<String> sendOtp(@RequestParam String email) {
-        otpService.generateOtp(email);
-        return ResponseEntity.ok("OTP sent to " + email);
+        String code = otpService.generateOtp(email);
+        return ResponseEntity.ok("OTP sent to " + email + " code: " + code + " (check server log, expires in 5 min)");
     }
 
     @PostMapping("/verify-otp")

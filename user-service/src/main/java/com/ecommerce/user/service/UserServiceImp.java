@@ -34,6 +34,7 @@ public class UserServiceImp implements UserService {
                 .lastName(user.getLastName())
                 .email(user.getEmail())
                 .password(passwordEncoder.encode(user.getPassword()))
+                .phone(user.getPhone())
                 .active(true)
                 .userRole(UserRole.CUSTOMER)
                 .build();
