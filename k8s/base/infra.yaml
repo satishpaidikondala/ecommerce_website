@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce-registry
+  namespace: ecommerce
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ecommerce-registry
+  template:
+    metadata:
+      labels:
+        app: ecommerce-registry
+    spec:
+      containers:
+      - name: registry
+        image: ecommerce/ecommerce-registry:latest
+        ports:
+        - containerPort: 8761
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8761
+          initialDelaySeconds: 30
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ecommerce-registry
+  namespace: ecommerce
+spec:
+  selector:
+    app: ecommerce-registry
+  ports:
+  - port: 8761
+    targetPort: 8761
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecommerce-gateway
+  namespace: ecommerce
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ecommerce-gateway
+  template:
+    metadata:
+      labels:
+        app: ecommerce-gateway
+    spec:
+      containers:
+      - name: gateway
+        image: ecommerce/ecommerce-gateway:latest
+        ports:
+        - containerPort: 8080
+        envFrom:
+        - configMapRef:
+            name: ecommerce-config
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: 8080
+          initialDelaySeconds: 40
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ecommerce-gateway
+  namespace: ecommerce
+spec:
+  type: LoadBalancer
+  selector:
+    app: ecommerce-gateway
+  ports:
+  - port: 80
+    targetPort: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ecommerce-ingress
+  namespace: ecommerce
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: ecommerce.local
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ecommerce-gateway
+            port:
+              number: 80
