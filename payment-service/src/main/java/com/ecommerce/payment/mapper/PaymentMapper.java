@@ -8,6 +8,6 @@ public class PaymentMapper {
     public static PaymentResponse toResponse(Payment p) {
         return new PaymentResponse(p.getId(), p.getPaymentNumber(), p.getTransactionId(),
                 p.getStatus()!=null?p.getStatus().name():null, p.getPaymentMethod(), p.getAmount(),
-                p.getOrder()!=null?p.getOrder().getId():null, p.getCreatedAt());
+                p.getOrderId(), p.getCreatedAt());
     }
 }

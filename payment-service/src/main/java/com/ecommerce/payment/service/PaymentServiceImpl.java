@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.ecommerce.common.entity.Order;
 import com.ecommerce.common.entity.Payment;
 import com.ecommerce.common.entity.PaymentStatus;
 import com.ecommerce.payment.dto.CreatePaymentRequest;
@@ -27,7 +26,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .transactionId(UUID.randomUUID().toString())
                 .paymentMethod(req.getPaymentMethod())
                 .amount(req.getAmount())
-                .order(Order.builder().id(req.getOrderId()).build())
+                .orderId(req.getOrderId())
                 .build();
         return paymentRepository.save(p);
     }
