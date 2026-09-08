@@ -39,9 +39,8 @@ public class Payment {
 
     private LocalDateTime paymentDate;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id")
-    private Order order;
+    @Column(name = "order_id", nullable = false)
+    private Long orderId;
 
     private LocalDateTime createdAt;
 
